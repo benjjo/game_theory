@@ -2,6 +2,10 @@ import random
 
 
 class GameRunner:
+    """Runs two strategies against each other for a set number of games. Presents the scores at the end in text.
+    Returns the two strategy names and their respective scores.
+    :returns: str (name of strategy 1), int (strategy 1 score), str (name of strategy 2), int (strategy 2 score)
+    """
     def __init__(self, player1, player2, num_games):
         self.player1 = player1
         self.player2 = player2
@@ -39,6 +43,8 @@ class GameRunner:
         print(f"{self.player1.name}'s score: {player1_score}")
         print(f"{self.player2.name}'s score: {player2_score}")
 
+        return self.player1, player1_score, self.player2, player2_score
+
     def generate_choice_noise(self):
         # The choice is random with 90% in favor of Cooperation.
         choices = ['Cooperate', 'Defect']
@@ -51,6 +57,10 @@ class GameRunner:
 
 
 class TitForTat:
+    """The strategy of do unto thee what was done unto me. Not really an eye-for-an because it is not vengeance
+     that is sought, but more that this strategy is not a push-over.
+     A 'NICE' strategy in that we start peacefully until provoked."""
+
     def __init__(self, name="TitForTat"):
         self.name = name
         self.choice = "Cooperate"
@@ -69,6 +79,11 @@ class TitForTat:
 
 
 class AlwaysDefect:
+    """The strategy of the logical. This strategy is not a push-over and never will be. It is also unforgiving.
+    The logical strategy concludes that the opponent will also choose to Defect. This is because of the risk
+    involved with the selection of the cooperative choice. While not the most optimal, it will guarantee points.
+    A 'NOT NICE' strategy in that we start and end with provocation."""
+
     def __init__(self, name="AlwaysDefect"):
         self.name = name
         self.choice = "Defect"
@@ -81,6 +96,10 @@ class AlwaysDefect:
 
 
 class AlwaysCooperate:
+    """The strategy of do only kindness unto all.This strategy is a push-over but has the potential to score the
+    highest.
+     A 'NICE' strategy in that we start and end peacefully."""
+
     def __init__(self, name="AlwaysCooperate"):
         self.name = name
         self.choice = "Cooperate"
@@ -93,6 +112,11 @@ class AlwaysCooperate:
 
 
 class SoftTitForTat:
+    """The strategy of do unto thee what was done unto me but let's not get ourselves tied up in a circular argument
+    for all eternity. This strategy is not a push-over.
+    A 'NICE' strategy in that we start peacefully until provoked but if we continue in a cycle of punishment, it will
+    sacrifice a move for the greater good."""
+
     def __init__(self, name="SoftTitForTat"):
         self.name = name
         self.choice = "Cooperate"
