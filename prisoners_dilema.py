@@ -12,8 +12,13 @@ class GameRunner:
         player2_score = 0
 
         for _ in range(self.num_games):
-            choice1 = self.player1.get_choice()
-            choice2 = self.player2.get_choice()
+            # The 1% chance that noise is introduced
+            if random.randint(1, 100) != 1:
+                choice1 = self.player1.get_choice()
+                choice2 = self.player2.get_choice()
+            else:
+                choice1 = self.generate_choice_noise()
+                choice2 = self.generate_choice_noise()
 
             if choice1 == "Cooperate" and choice2 == "Cooperate":
                 player1_score += 3
@@ -26,13 +31,23 @@ class GameRunner:
                 player1_score += 1
                 player2_score += 1
 
-            # Update the strategies with the opponent's choice
+            # Update the strategies with the opponent's previous choice
             self.player1.make_choice(choice2)
             self.player2.make_choice(choice1)
             print(f"{self.player1.name} = {choice1}\t\t {self.player2.name} = {choice2}")
 
         print(f"{self.player1.name}'s score: {player1_score}")
         print(f"{self.player2.name}'s score: {player2_score}")
+
+    def generate_choice_noise(self):
+        # The choice is random with 90% in favor of Cooperation.
+        choices = ['Cooperate', 'Defect']
+        probabilities = [0.9, 0.1]
+
+        # Generate a random choice based on the specified probabilities
+        random_choice = random.choices(choices, probabilities)[0]
+
+        return random_choice
 
 
 class TitForTat:
@@ -100,16 +115,6 @@ class SoftTitForTat:
             self.set_choice("Cooperate")
         else:
             self.set_choice("Defect")
-
-
-    def generate_choice_noise(self):
-        choices = ['Cooperate', 'Defect']
-        probabilities = [0.9, 0.1]
-
-        # Generate a random choice based on the specified probabilities
-        random_choice = random.choices(choices, probabilities)[0]
-
-        return random_choice
 
 
 # Example usage:
