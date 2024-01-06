@@ -2,6 +2,27 @@ import random
 from Strategies import *
 
 
+class Tournament:
+    def __init__(self, strategy_classes, num_games_per_match=10):
+        self.strategy_classes = strategy_classes
+        self.num_games_per_match = num_games_per_match
+        self.scores = {strategy_class.__name__: 0 for strategy_class in strategy_classes}
+
+    def run_tournament(self):
+        for i, strategy1 in enumerate(self.strategy_classes):
+            for j, strategy2 in enumerate(self.strategy_classes):
+                # if i != j:  # Avoid playing a strategy against itself
+                player1 = strategy1()
+                player2 = strategy2()
+                game_runner = GameRunner(player1, player2, self.num_games_per_match)
+                player1, player1_score, player2, player2_score = game_runner.run_game()
+
+                self.scores[player1.name] += player1_score
+                self.scores[player2.name] += player2_score
+
+        return self.scores
+
+
 class GameRunner:
     """Runs two strategies against each other for a set number of games. Presents the scores at the end in text.
     Returns the two strategy names and their respective scores.
@@ -58,16 +79,13 @@ class GameRunner:
 
 
 # Example usage:
-tit_for_tat_strategy = TitForTat()
-soft_tit_for_tat_strategy = SoftTitForTat()
-always_defect_strategy = AlwaysDefect()
-always_cooperate_strategy = AlwaysCooperate()
-friedman_strategy = Friedman()
+strategies = [TitForTat, AlwaysDefect, SoftTitForTat, AlwaysCooperate, Friedman]  # Add more strategies as needed
+tournament = Tournament(strategies, num_games_per_match=200)
+overall_scores = tournament.run_tournament()
 
-# game_runner = GameRunner(tit_for_tat_strategy, always_defect_strategy, num_games=200)
-# game_runner = GameRunner(soft_tit_for_tat_strategy, always_defect_strategy, num_games=200)
-# game_runner = GameRunner(tit_for_tat_strategy, always_cooperate_strategy, num_games=200)
-# game_runner = GameRunner(tit_for_tat_strategy, tit_for_tat_strategy, num_games=200)
-game_runner = GameRunner(soft_tit_for_tat_strategy, friedman_strategy, num_games=200)
+sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
 
-game_runner.run_game()
+print("Overall Scores:")
+for strategy, score in sorted_scores:
+    print(f"{strategy}: {score}")
+
