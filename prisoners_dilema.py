@@ -14,7 +14,8 @@ class Tournament:
                 # if i != j:  # Avoid playing a strategy against itself
                 player1 = strategy1()
                 player2 = strategy2()
-                game_runner = GameRunner(player1, player2, self.num_games_per_match)
+                # Change the noise assignment to True to introduce noise
+                game_runner = GameRunner(player1, player2, self.num_games_per_match, noise=True)
                 player1, player1_score, player2, player2_score = game_runner.run_game()
 
                 self.scores[player1.name] += player1_score
@@ -28,23 +29,24 @@ class GameRunner:
     Returns the two strategy names and their respective scores.
     :returns: str (name of strategy 1), int (strategy 1 score), str (name of strategy 2), int (strategy 2 score)
     """
-    def __init__(self, player1, player2, num_games):
+    def __init__(self, player1, player2, num_games, noise):
         self.player1 = player1
         self.player2 = player2
         self.num_games = num_games
+        self.noise = noise
 
     def run_game(self):
         player1_score = 0
         player2_score = 0
 
         for _ in range(self.num_games):
-            # The 1% chance that noise is introduced
-            if random.randint(1, 50) != 1:
-                choice1 = self.player1.get_choice()
-                choice2 = self.player2.get_choice()
-            else:
-                choice1 = self.generate_choice_noise()
-                choice2 = self.generate_choice_noise()
+            choice1 = self.player1.get_choice()
+            choice2 = self.player2.get_choice()
+
+            if self.noise:
+                # If noise is set to True, this will introduce a 1% chance of the choice being flipped.
+                choice1 = self.generate_choice_noise(choice1)
+                choice2 = self.generate_choice_noise(choice2)
 
             if choice1 == "Cooperate" and choice2 == "Cooperate":
                 player1_score += 3
@@ -60,32 +62,34 @@ class GameRunner:
             # Update the strategies with the opponent's previous choice
             self.player1.make_choice(choice2)
             self.player2.make_choice(choice1)
-            print(f"{self.player1.name} = {choice1}\t\t\t\t {self.player2.name} = {choice2}")
+            print(f"{self.player1.name:<20} :: {choice1:<20} {self.player2.name:<20} :: {choice2:<10}")
 
         print(f"{self.player1.name}'s score: {player1_score}")
         print(f"{self.player2.name}'s score: {player2_score}")
 
         return self.player1, player1_score, self.player2, player2_score
 
-    def generate_choice_noise(self):
-        # The choice is random with 90% in favor of Cooperation.
-        choices = ['Cooperate', 'Defect']
-        probabilities = [0.9, 0.1]
-
-        # Generate a random choice based on the specified probabilities
-        random_choice = random.choices(choices, probabilities)[0]
-
-        return random_choice
+    def generate_choice_noise(self, choice):
+        # 1% chance the choice will be flipped
+        if random.randint(1, 100) == 1:
+            if choice == "Defect":
+                return "Cooperate"
+            else:
+                return "Defect"
+        return choice
 
 
 # Example usage:
 strategies = [TitForTat, AlwaysDefect, SoftTitForTat, AlwaysCooperate, Friedman]  # Add more strategies as needed
-tournament = Tournament(strategies, num_games_per_match=200)
+tournament = Tournament(strategies, num_games_per_match=2000)
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
 
-print("Overall Scores:")
+print('*'*44)
+print(" Overall Scores, sorted by highest ranking:")
+print('*'*44)
 for strategy, score in sorted_scores:
     print(f"{strategy}: {score}")
+print('*'*44)
 
