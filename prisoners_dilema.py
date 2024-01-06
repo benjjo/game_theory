@@ -3,6 +3,9 @@ from Strategies import *
 
 
 class Tournament:
+    """Runs a tournament of X amount of games, where the strategies are played against each other in a round-robin
+    type of tournament. Scores are then printed to the screen.
+    Noise can be introduced by setting the noise parameter to True."""
     def __init__(self, strategy_classes, num_games_per_match=10):
         self.strategy_classes = strategy_classes
         self.num_games_per_match = num_games_per_match
@@ -27,6 +30,10 @@ class Tournament:
 class GameRunner:
     """Runs two strategies against each other for a set number of games. Presents the scores at the end in text.
     Returns the two strategy names and their respective scores.
+    Points are awarded as follows:
+        A score of 3-3 is awarded to Cooperate - Cooperate outcome.
+        A score of 5-0 is awarded to a Defect - Cooperate outcome in favour of the Defective party.
+        A score of 1-1 is awarded to a Defect - Defect outcome.
     :returns: str (name of strategy 1), int (strategy 1 score), str (name of strategy 2), int (strategy 2 score)
     """
     def __init__(self, player1, player2, num_games, noise):
@@ -85,7 +92,7 @@ tournament = Tournament(strategies, num_games_per_match=2000)
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
-
+print("")
 print('*'*44)
 print(" Overall Scores, sorted by highest ranking:")
 print('*'*44)
