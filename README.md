@@ -19,6 +19,7 @@ Subclasses
 The `Tournament` class orchestrates multiple `GameRunner` sessions for various pairs of strategies, keeping an overall tally of scores.
 
 # Example usage:
+```
 strategies = [TitForTat, AlwaysDefect, SoftTitForTat, AlwaysCooperate, Friedman]  # Add more strategies as needed
 tournament = Tournament(strategies, num_games_per_match=200)
 overall_scores = tournament.run_tournament()
@@ -31,4 +32,4 @@ print('*'*44)
 for strategy, score in sorted_scores:
     print(f"{strategy}: {score}")
 print('*'*44)
-
+```
