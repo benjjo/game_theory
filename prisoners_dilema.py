@@ -87,9 +87,11 @@ class GameRunner:
 
 
 # Example usage:
-strategies = [TitForTat, AlwaysDefect, SoftTitForTat,
-              AlwaysCooperate, Friedman, Joss, Graaskamp, Nydegger]  # Add more strategies as needed
-tournament = Tournament(strategies, num_games_per_match=200, noise=True)  # Mess with the parameters if you want.
+strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
+              AlwaysCooperate, Friedman, Joss, Graaskamp, Nydegger,
+              TitForTwoTats, Random]  # Add more strategies as needed
+games = random.randint(200, 1000)
+tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
@@ -97,6 +99,7 @@ print("")
 print('*'*44)
 print(" Overall Scores, sorted by highest ranking:")
 print('*'*44)
+print(f"Number of games: {games}\n")
 for strategy, score in sorted_scores:
     print(f"{strategy}: {score}")
 print('*'*44)

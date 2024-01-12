@@ -82,14 +82,14 @@ class AlwaysCooperate(Strategy):
         pass
 
 
-class SoftTitForTat(Strategy):
+class GenerousTitForTat(Strategy):
     """The strategy of do unto thee what was done unto me but let's not get ourselves tied up in a circular argument
     for all eternity. This strategy is not a push-over.
     A 'NICE' strategy in that we start peacefully until provoked but if we continue in a cycle of punishment, it will
     sacrifice a move for the greater good."""
 
     def __init__(self):
-        super().__init__("SoftTitForTat", "Cooperate")
+        super().__init__("GenerousTitForTat", "Cooperate")
         self.historic_choices = list()
 
     def get_choice(self):
@@ -282,5 +282,48 @@ class Nydegger(Strategy):
             self.set_choice("Defect")
         else:
             self.set_choice("Cooperate")
+
+
+class TitForTwoTats(Strategy):
+    """
+        The TitForTwoTats strategy is based on the following rules:
+
+        The Sample strategy cooperates on the first round.
+        After the first round, it analyzes the opponent's last two moves.
+        If the opponent has defected both times, Sample will defect.
+        Otherwise, it will cooperate."""
+
+    def __init__(self):
+        super().__init__("TitForTwoTats", "Cooperate")
+        self.history = list()
+
+    def get_choice(self):
+        return self.choice
+
+    def set_choice(self, new_choice):
+        self.choice = new_choice
+
+    def make_choice(self, opp_choice):
+        self.history.append(opp_choice)
+        if self.history[-2:].count("Defect") == 2:
+            self.set_choice("Defect")
+        else:
+            self.set_choice("Cooperate")
+
+
+class Random(Strategy):
+    """Straight up random"""
+
+    def __init__(self):
+        super().__init__("Random", "Cooperate")
+
+    def get_choice(self):
+        return self.choice
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def make_choice(self, opp_choice):
+        self.set_choice(random.choice(["Defect", "Cooperate"]))
 
 
