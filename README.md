@@ -64,6 +64,26 @@ AlwaysDefect: 5139
 Joss: 5090
 ********************************************
 ```
+```
+
+********************************************
+ Overall Scores, sorted by highest ranking:
+********************************************
+Number of games: 303
+
+TitForTwoTats: 15191
+Nydegger: 14571
+GenerousTitForTat: 14360
+AlwaysCooperate: 13977
+TitForTat: 13168
+Random: 13130
+Graaskamp: 12810
+Joss: 11382
+Friedman: 11051
+AlwaysDefect: 10284
+********************************************
+```
+
 # References
 Malik, A. (2020). Strategies for the Iterated Prisoner’s Dilemma. November 2020. Retrieved from https://arxiv.org/pdf/2111.11561.pdf
 
