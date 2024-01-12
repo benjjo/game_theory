@@ -43,7 +43,7 @@ print('*'*44)
 ********************************************
  Overall Scores, sorted by highest ranking:
 ********************************************
-SoftTitForTat: 4475
+GenerousTitForTat: 4475
 TitForTat: 4067
 Friedman: 4064
 AlwaysDefect: 3837
@@ -56,7 +56,7 @@ AlwaysCooperate: 3832
 ********************************************
 Nydegger: 7852
 AlwaysCooperate: 7201
-SoftTitForTat: 7157
+GenerousTitForTat: 7157
 TitForTat: 6692
 Graaskamp: 6421
 Friedman: 6074
