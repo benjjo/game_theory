@@ -7,6 +7,8 @@ The key component to replicating the results presented in the Veritasium present
 
 This is a work in progress and created out of curiosity. The end goal is to simply replicate the results of the Axelrod Tournament and setup some nice clean python code for others to expand on if that should tickle one's fancy. 
 
+# Description
+
 Classes
 `GameRunner`
 The `GameRunner` class runs a specified number of games between two strategies and calculates the scores.
