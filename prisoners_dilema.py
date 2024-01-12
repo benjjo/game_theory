@@ -6,24 +6,25 @@ class Tournament:
     """Runs a tournament of X amount of games, where the strategies are played against each other in a round-robin
     type of tournament. Scores are then printed to the screen.
     Noise can be introduced by setting the noise parameter to True."""
-    def __init__(self, strategy_classes, num_games_per_match=10):
+    def __init__(self, strategy_classes, num_games_per_match=200, noise=True):
         self.strategy_classes = strategy_classes
         self.num_games_per_match = num_games_per_match
         self.scores = {strategy_class.__name__: 0 for strategy_class in strategy_classes}
+        self.noise = noise
 
     def run_tournament(self):
+        noise = self.noise
         for i, strategy1 in enumerate(self.strategy_classes):
             for j, strategy2 in enumerate(self.strategy_classes):
                 # if i != j:  # Avoid playing a strategy against itself
                 player1 = strategy1()
                 player2 = strategy2()
                 # Change the noise assignment to True to introduce noise
-                game_runner = GameRunner(player1, player2, self.num_games_per_match, noise=True)
+                game_runner = GameRunner(player1, player2, self.num_games_per_match, noise)
                 player1, player1_score, player2, player2_score = game_runner.run_game()
 
                 self.scores[player1.name] += player1_score
                 self.scores[player2.name] += player2_score
-
         return self.scores
 
 
@@ -69,15 +70,14 @@ class GameRunner:
             # Update the strategies with the opponent's previous choice
             self.player1.make_choice(choice2)
             self.player2.make_choice(choice1)
-            print(f"{self.player1.name:<20} :: {choice1:<20} {self.player2.name:<20} :: {choice2:<10}")
+            # print(f"{self.player1.name:<20} :: {choice1:<20} {self.player2.name:<20} :: {choice2:<10}")
 
-        print(f"{self.player1.name}'s score: {player1_score}")
-        print(f"{self.player2.name}'s score: {player2_score}")
+        print(f"{self.player1.name} vs {self.player2.name} :: {player1_score} : {player2_score} ")
 
         return self.player1, player1_score, self.player2, player2_score
 
     def generate_choice_noise(self, choice):
-        # 1% chance the choice will be flipped
+        # 1% chance the choice will be flipped. This will only be invoked if noise is set to True.
         if random.randint(1, 100) == 1:
             if choice == "Defect":
                 return "Cooperate"
@@ -87,8 +87,9 @@ class GameRunner:
 
 
 # Example usage:
-strategies = [TitForTat, AlwaysDefect, SoftTitForTat, AlwaysCooperate, Friedman]  # Add more strategies as needed
-tournament = Tournament(strategies, num_games_per_match=2000)
+strategies = [TitForTat, AlwaysDefect, SoftTitForTat,
+              AlwaysCooperate, Friedman, Joss, Graaskamp, Nydegger]  # Add more strategies as needed
+tournament = Tournament(strategies, num_games_per_match=200, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
