@@ -1,8 +1,11 @@
-# Game Theory Tournament
+# Game Theory - Axelrod Tournament
 
-This Python program simulates a tournament in game theory, where different strategies compete against each other in the Prisoner's Dilemma. Strategies include TitForTat and AlwaysDefect.
-The key component is the random error generator. This is to simulate false positives/negatives to simulate real world situations. For example:
-"On 26 September 1983, during the Cold War, the Soviet nuclear early warning system Oko reported the launch of one intercontinental ballistic missile with four more missiles behind it, from the United States. Petrov, suspecting a false alarm, decided to wait for a confirmation that never came."
+This Python program simulates a tournament in the vein of the Axelrod Tournament, where different strategies compete against each other in the game of the Prisoner's Dilemma. Strategies include TitForTat and AlwaysDefect for example. This Tournament is an attempt to replicate and help understand the works of "Strategies for the Iterated Prisoner’s Dilemma" (Anagh Malik, 2020), and is heavily influenced by the Youtube channel Veritasium and their presentation "What The Prisoner's Dilemma Reveals About Life, The Universe, and Everything". 
+
+The key component to replicating the results presented in the Veritasium presentation is the random error generator. This is to simulate false positives/negatives to simulate real world situations. Veritasium use the example:
+```"On 26 September 1983, during the Cold War, the Soviet nuclear early warning system Oko reported the launch of one intercontinental ballistic missile with four more missiles behind it, from the United States. Petrov, suspecting a false alarm, decided to wait for a confirmation that never came." ```
+
+This is a work in progress and created out of curiosity. The end goal is to simply replicate the results of the Axelrod Tournament and setup some nice clean python code for others to expand on if that should tickle one's fancy. 
 
 Classes
 `GameRunner`
@@ -33,3 +36,8 @@ for strategy, score in sorted_scores:
     print(f"{strategy}: {score}")
 print('*'*44)
 ```
+
+
+# References
+Malik, A. (2020). Strategies for the Iterated Prisoner’s Dilemma. November 2020. Retrieved from https://arxiv.org/pdf/2111.11561.pdf
+Muller, D. (2023, December 24). What The Prisoner's Dilemma Reveals About Life, The Universe, and Everything. Retrieved from https://www.youtube.com/watch?v=mScpHTIi-kM
