@@ -19,9 +19,6 @@ class Strategy:
     def make_choice(self, opp_choice):
         raise NotImplementedError("Subclasses must implement the make_choice method")
 
-    def update_opponent_choice(self, choice):
-        pass
-
 
 class TitForTat(Strategy):
     """The strategy of do unto thee what was done unto me. Not really an eye-for-an because it is not vengeance
@@ -92,11 +89,8 @@ class GenerousTitForTat(Strategy):
         return self.choice
 
     def set_choice(self, new_choice):
-        self.update_opp_choice(new_choice)
+        self.historic_choices.append(new_choice)
         self.choice = new_choice
-
-    def update_opp_choice(self, recent_choice):
-        self.historic_choices.append(recent_choice)
 
     def make_choice(self, opp_choice):
         if self.historic_choices[-10:].count('Defect') >= 10:
