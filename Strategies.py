@@ -1,9 +1,5 @@
 import random
-
-""" 
-Strategies to be added:
-Tideman & Chieruzzi, Nydegger, Grofman, Shubik, Stein & Rapoport, Davis, Downing, Feld, Tullock, (Name Withheld), 
-Random"""
+from Matrix import *
 
 
 class Strategy:
@@ -179,6 +175,7 @@ class Graaskamp(Strategy):
 
 class TidemanChieruzzi(Strategy):
     """
+    Tideman & Chieruzzi strategy
     This strategy begins by playing Tit For Tat and then things get slightly complicated:
     Every run of defections played by the opponent increases the number of defections that this strategy
     retaliates with by 1. The opponent is given a ‘fresh start’ if:
@@ -187,7 +184,7 @@ class TidemanChieruzzi(Strategy):
     - and it has been at least 20 rounds since the last ‘fresh start’
     - and there are more than 10 rounds remaining in the tournament
     - and the total number of defections differs from a 50-50 random sample by at least 3.0 standard deviations.
-    A ‘fresh start’ is a sequence of two cooperations followed by an assumption that the game has just
+    A ‘fresh start’ is a sequence of two co-operations followed by an assumption that the game has just
     started (everything is forgotten).
     See https://github.com/Axelrod-Python/Axelrod/issues/1105
 
@@ -196,64 +193,14 @@ class TidemanChieruzzi(Strategy):
 
     def __init__(self):
         super().__init__("TidemanChieruzzi", "Cooperate")
-        self.history = []
-        self.defection_runs = 0
-        self.opponent_defection_runs = 0
-        self.last_fresh_start_round = 0
-        self.cooperation_count = 0
-        self.total_rounds = 0
+
+    def set_choice(self, choice):
+        self.choice = choice
 
     def get_choice(self):
         return self.choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
-
-    def make_choice(self, opp_choice, opponent_score=None, own_score=None):
-        if not self.history:
-            # Start with Tit For Tat
-            return "Cooperate"
-
-        if self.should_start_fresh(opponent_score):
-            self.start_fresh()
-            return "Cooperate"
-
-        # Retaliate with increasing defections based on opponent's recent defections
-        retaliation_count = min(self.defection_runs, 5)
-        return "Defect" if self.opponent_defection_runs >= retaliation_count else "Cooperate"
-
-    def update_opponent_choice(self, choice):
-        super().update_opponent_choice(choice)
-        self.history.append(choice)
-
-    def should_start_fresh(self, opponent_score):
-        return (
-            opponent_score is not None
-            and opponent_score + 10 <= self.get_own_score()
-            and self.opponent_defection_runs > 0
-            and self.total_rounds - self.last_fresh_start_round >= 20
-            and self.total_rounds <= 190  # Assuming there are more than 10 rounds remaining
-            and self.defection_difference_significant()
-        )
-
-    def start_fresh(self):
-        # Start a fresh sequence
-        self.history.extend(["Cooperate", "Cooperate"])
-        self.opponent_defection_runs = 0
-        self.defection_runs = 0
-        self.last_fresh_start_round = self.total_rounds
-        self.cooperation_count = 0
-
-    def defection_difference_significant(self):
-        # Check if the total defections differ from a 50-50 random sample by at least 3.0 standard deviations
-        total_defections = self.history.count("Defect")
-        expected_defections = len(self.history) / 2  # Assuming 50-50 random sample
-        deviation = abs(total_defections - expected_defections) / (len(self.history) / 2)
-        return deviation >= 3.0
-
-    def get_own_score(self):
-        # Calculate the current own score based on the history
-        # return sum([3 if self.get_choice() == "Cooperate" else 5 for self.get_choice() in self.history])
+    def make_choice(self, opp_choice):
         pass
 
 
@@ -327,3 +274,219 @@ class Random(Strategy):
         self.set_choice(random.choice(["Defect", "Cooperate"]))
 
 
+class Grofman(Strategy):
+    """The Grofman strategy is a probabilistic strategy designed for the iterated prisoner's dilemma (IPD) game.
+    It was introduced by Bernard Grofman in the early 1980s. The Grofman strategy is based on probabilistic
+    decision-making, aiming to strike a balance between cooperation and defection
+
+    Probabilistic Decision-Making:
+    The core of the Grofman strategy involves probabilistic decision-making. Instead of strictly choosing to cooperate
+    or defect, the strategy assigns probabilities to each action.
+
+    Randomized Choices:
+    In each round of the game, the Grofman strategy randomly chooses between cooperation and defection based on the
+    assigned probabilities.
+
+    Adaptive Probabilities:
+    The strategy adapts its probabilities based on the outcomes of previous rounds. If cooperation leads to favorable
+    outcomes, the probability of cooperating in the next round may increase. Conversely, if defection results in better
+    outcomes, the probability of defecting may increase.
+
+    Learning from Opponent's Behavior:
+    The Grofman strategy may adjust its probabilities based on the opponent's behavior. For example, if the opponent
+    tends to defect frequently, the Grofman strategy may increase the probability of defection in response.
+
+    Exploration and Exploitation:
+    The strategy aims to balance exploration and exploitation. It explores different actions by assigning non-zero
+    probabilities to both cooperation and defection. Over time, it exploits the actions that lead to higher payoffs.
+
+    Stochastic Behavior:
+    The Grofman strategy's stochastic (randomized) behavior adds an element of unpredictability, making it challenging
+    for opponents to exploit a deterministic pattern.
+
+    Probabilistic Tit For Tat (PTFT) Variation:
+    There is a variation of the Grofman strategy known as Probabilistic Tit For Tat (PTFT). PTFT starts by cooperating
+    and then probabilistically imitates the opponent's previous move in each subsequent round.
+
+    Performance in Tournaments:
+    The Grofman strategy is designed to perform well in IPD tournaments by adapting to the opponent's strategy and
+    maintaining a level of unpredictability through its probabilistic decision-making.
+    """
+
+    def __init__(self):
+        super().__init__("Grofman", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass
+
+
+class Shubik(Strategy):
+    """
+    This is Shubik's strategy, which ranked fifth in Axelrod's first tournament. It plays as TFT, with the following
+    modification. SHU defects once following an opponent's first defection, then co-operates. If the opponent defects
+    on a second occasion when SHU co-operates, SHU then defects twice before resuming cooperation. After each occasion
+    on which the opponent defects when SHU co-operates, SHU increments its retaliatory defections by one. SHU thus
+    becomes progressively less forgiving, in direct arithmetic relation to the number of occasions on which SHU s
+    co-operation meets with an opponent's defection.
+
+    """
+
+    def __init__(self):
+        super().__init__("Shubik", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass
+
+
+class SteinRapoport(Strategy):
+    """
+
+    """
+
+    def __init__(self):
+        super().__init__("SteinRapoport", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass
+
+
+class WinStayLooseShift(Strategy):
+    """
+    In the context of the Win-Stay, Lose-Shift (WSLS) strategy in the Iterated Prisoner's Dilemma (IPD), what is
+    considered a "high payoff" is typically defined relative to the payoffs received in the previous round.
+
+    The WSLS strategy operates based on the following principles:
+
+    Win-Stay: If the strategy received a high payoff in the previous round (for example, mutual cooperation), it
+    continues to cooperate.
+
+    Lose-Shift: If the strategy received a low payoff in the previous round (for example, mutual defection), it shifts
+    its behavior and defects in the next round.
+    """
+
+    def __init__(self):
+        super().__init__("WinStayLooseShift", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        payoff = PayoffMatrix.calculate_payoff(self.get_choice(), opp_choice)
+        self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
+
+
+class Benjo(Strategy):
+    """
+    WSLS with a Tit-For-Two-Tat
+    """
+
+    def __init__(self):
+        super().__init__("Benjo", "Cooperate")
+        self.opp_history = list()
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        self.opp_history.append(opp_choice)
+        if self.opp_history[-2:].count("Defect") == 2:
+            self.set_choice("Defect")
+        else:
+            payoff = PayoffMatrix.calculate_payoff(self.get_choice(), opp_choice)
+            self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
+
+
+class Downing(Strategy):
+    """
+
+    """
+
+    def __init__(self):
+        super().__init__("Downing", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass
+
+
+class Feld(Strategy):
+    """
+
+    """
+
+    def __init__(self):
+        super().__init__("Feld", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass
+
+
+class Tullock(Strategy):
+    """
+
+    """
+
+    def __init__(self):
+        super().__init__("Tullock", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass
+
+
+class NameWithheld(Strategy):
+    """
+
+    """
+
+    def __init__(self):
+        super().__init__("NameWithheld", "Cooperate")
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        pass

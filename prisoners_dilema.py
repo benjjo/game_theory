@@ -1,4 +1,3 @@
-import random
 from Strategies import *
 
 
@@ -72,9 +71,10 @@ class GameRunner:
             self.player2.make_choice(choice1)
             # print(f"{self.player1.name:<20} :: {choice1:<20} {self.player2.name:<20} :: {choice2:<10}")
 
-        print(f"{self.player1.name} vs {self.player2.name} :: {player1_score} : {player2_score} ")
+        print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
 
         return self.player1, player1_score, self.player2, player2_score
+
 
     def generate_choice_noise(self, choice):
         # 1% chance the choice will be flipped. This will only be invoked if noise is set to True.
@@ -89,7 +89,8 @@ class GameRunner:
 # Example usage:
 strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
               AlwaysCooperate, Friedman, Joss, Graaskamp, Nydegger,
-              TitForTwoTats, Random]  # Add more strategies as needed
+              TitForTwoTats, Random, WinStayLooseShift, Benjo]  # Add more strategies as needed
+# strategies = [AlwaysDefect, Benjo]
 games = random.randint(200, 1000)
 tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
@@ -101,6 +102,6 @@ print(" Overall Scores, sorted by highest ranking:")
 print('*'*44)
 print(f"Number of games: {games}\n")
 for strategy, score in sorted_scores:
-    print(f"{strategy}: {score}")
+    print(f"{strategy:>20}: {score}")
 print('*'*44)
 
