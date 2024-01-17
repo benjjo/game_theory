@@ -1,5 +1,5 @@
 import random
-from Matrix import *
+from GameTools import *
 
 
 class Strategy:
@@ -187,6 +187,14 @@ class TidemanChieruzzi(Strategy):
 
     def __init__(self):
         super().__init__("TidemanChieruzzi", "Cooperate")
+        self.retaliation_counter = 0
+        self.retaliations = 0
+        self.fresh_start = bool()
+        self.fresh_start_counter = 0
+        self.my_points = 0
+        self.their_points = 0
+        self.history = list()
+        self.games_counter = 0
 
     def set_choice(self, choice):
         self.choice = choice
@@ -194,8 +202,34 @@ class TidemanChieruzzi(Strategy):
     def get_choice(self):
         return self.choice
 
+    def set_fresh_start_condition(self, my_choice, opp_choice):
+        """The opponent is given a ‘fresh start’ if it is 10 points behind this strategy"""
+        self.fresh_start_counter += 1
+        self.games_counter += 1
+        self.my_points += Tools.calculate_payoff(my_choice, opp_choice)
+        self.their_points += Tools.calculate_payoff(opp_choice, my_choice)
+        return (
+                self.my_points - self.their_points >= 10
+                and self.history[-2:].count("Defect") == 2
+                and self.fresh_start_counter > 20
+                and self.games_counter < 190
+                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history)
+        )
+
     def make_choice(self, opp_choice):
-        pass
+        self.history.append(opp_choice)
+        self.set_fresh_start_condition(self.get_choice(), opp_choice)
+
+        if opp_choice == "Defect":
+            self.retaliations += 1
+            self.retaliation_counter = self.retaliations  # start the retaliations counter again
+        else:
+            if self.retaliation_counter > 0:
+                self.retaliation_counter -= 1
+
+        if self.fresh_start:
+            self.retaliation_counter = 0
+        self.set_choice("Defect" if self.retaliation_counter else "Cooperate")
 
 
 class Nydegger(Strategy):
@@ -395,7 +429,7 @@ class WinStayLooseShift(Strategy):
         return self.choice
 
     def make_choice(self, opp_choice):
-        payoff = PayoffMatrix.get_payoff_type(self.get_choice(), opp_choice)
+        payoff = Tools.get_payoff_type(self.get_choice(), opp_choice)
         self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
 
 
@@ -421,7 +455,7 @@ class Benjo(Strategy):
         if self.opp_history[-2:].count("Defect") == 2:
             self.set_choice("Defect")
         else:
-            payoff = PayoffMatrix.get_payoff_type(self.get_choice(), opp_choice)
+            payoff = Tools.get_payoff_type(self.get_choice(), opp_choice)
             self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
 
 
@@ -435,7 +469,7 @@ class Downing(Strategy):
 
     def __init__(self):
         super().__init__("Downing", "Cooperate")
-        self.opponent_history = []
+        self.opponent_history = list()
         self.cooperate_threshold = 0.7  # Adjust as needed
 
     def set_choice(self, choice):

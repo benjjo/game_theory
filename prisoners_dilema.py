@@ -46,28 +46,28 @@ class GameRunner:
         player1_score = 0
         player2_score = 0
 
-        for _ in range(self.num_games):
+        for i in range(self.num_games):
             choice1 = self.player1.get_choice()
             choice2 = self.player2.get_choice()
 
             if self.noise:
                 # If noise is set to True, this will introduce a 1% chance of the choice being flipped.
-                choice1 = self.generate_choice_noise(choice1)
-                choice2 = self.generate_choice_noise(choice2)
+                choice1 = GameRunner.generate_choice_noise(choice1)
+                choice2 = GameRunner.generate_choice_noise(choice2)
 
-            player1_score += PayoffMatrix.calculate_payoff(choice1, choice2)
-            player2_score += PayoffMatrix.calculate_payoff(choice2, choice1)
+            # Update the rolling score using the scoring matrix.
+            player1_score += Tools.calculate_payoff(choice1, choice2)
+            player2_score += Tools.calculate_payoff(choice2, choice1)
 
             # Update the strategies with the opponent's previous choice
             self.player1.make_choice(choice2)
             self.player2.make_choice(choice1)
 
         print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
-
         return self.player1, player1_score, self.player2, player2_score
 
-
-    def generate_choice_noise(self, choice):
+    @staticmethod
+    def generate_choice_noise(choice):
         # 1% chance the choice will be flipped. This will only be invoked if noise is set to True.
         if random.randint(1, 100) == 1:
             if choice == "Defect":
@@ -80,21 +80,21 @@ class GameRunner:
 # Example usage:
 
 # No random elements
-strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
-              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce,
-              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]  # Add more strategies as needed
+# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
+#               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce,
+#               TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]  # Add more strategies as needed
 games = 200
 
 # Introduced random elements
-# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss
-#               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
-#               TitForTwoTats, WinStayLooseShift, Benjo, Shubik]  # Add more strategies as needed
+strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi,
+              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+              TitForTwoTats, WinStayLooseShift, Benjo, Shubik]  # Add more strategies as needed
 # games = random.randint(200, 1000)
 
 # Testing games
 # strategies = [AlwaysCooperate, Shubik]
 
-tournament = Tournament(strategies, num_games_per_match=games, noise=False)  # Mess with the parameters if you want.
+tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
