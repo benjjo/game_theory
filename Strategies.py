@@ -333,6 +333,8 @@ class Shubik(Strategy):
 
     def __init__(self):
         super().__init__("Shubik", "Cooperate")
+        self.retaliation_counter = 0
+        self.retaliations = 0
 
     def set_choice(self, choice):
         self.choice = choice
@@ -341,7 +343,14 @@ class Shubik(Strategy):
         return self.choice
 
     def make_choice(self, opp_choice):
-        pass
+        if opp_choice == "Defect":
+            self.retaliations += 1
+            self.retaliation_counter = self.retaliations  # start the retaliations counter again
+        else:
+            if self.retaliation_counter > 0:
+                self.retaliation_counter -= 1
+
+        self.set_choice("Defect" if self.retaliation_counter else "Cooperate")
 
 
 class SteinRapoport(Strategy):
@@ -392,7 +401,9 @@ class WinStayLooseShift(Strategy):
 
 class Benjo(Strategy):
     """
-    WSLS with a Tit-For-Two-Tat
+    Tit-For-Two-Tat with a WSLS resolution in the case of a 'Cooperate'.
+    It's interesting to see that this resolves to a Tit-For-Tat strategy. Or at least I think it does.
+    I'm leaving it here to explore.
     """
 
     def __init__(self):
@@ -416,11 +427,16 @@ class Benjo(Strategy):
 
 class Downing(Strategy):
     """
-
+    DOWNING is based on an “outcome maximization” principle originally developed as a possible interpretation of
+    what human subjects do in the Prisoner's Dilemma lab experiments (Downing 1975).
+    DOWNING's strategy: – It will try to understand its opponent and then make the choice to maximize its score
+    in the long run.
     """
 
     def __init__(self):
         super().__init__("Downing", "Cooperate")
+        self.opponent_history = []
+        self.cooperate_threshold = 0.7  # Adjust as needed
 
     def set_choice(self, choice):
         self.choice = choice
@@ -429,7 +445,15 @@ class Downing(Strategy):
         return self.choice
 
     def make_choice(self, opp_choice):
-        pass
+        recent_opponent_moves = self.opponent_history[-10:]  # Adjust window size as needed
+        try:
+            cooperate_ratio = sum(1 for move in recent_opponent_moves if move == "Cooperate") / len(recent_opponent_moves)
+            if cooperate_ratio >= self.cooperate_threshold:
+                self.set_choice("Cooperate")
+            else:
+                self.set_choice("Defect")
+        except ZeroDivisionError:
+            self.set_choice("Cooperate")
 
 
 class Feld(Strategy):
@@ -484,3 +508,20 @@ class NameWithheld(Strategy):
 
     def make_choice(self, opp_choice):
         pass
+
+
+class DefectOnce(Strategy):
+    """Testing purposes only. Defects once then concedes."""
+
+    def __init__(self):
+        super().__init__("DefectOnce", "Defect")
+
+    def get_choice(self):
+        return self.choice
+
+    def set_choice(self, new_choice):
+        self.choice = new_choice
+
+    def make_choice(self, opp_choice):
+        self.set_choice("Cooperate")
+

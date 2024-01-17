@@ -87,12 +87,23 @@ class GameRunner:
 
 
 # Example usage:
+
+# No random elements
 strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
-              AlwaysCooperate, Friedman, Joss, Graaskamp, Nydegger,
-              TitForTwoTats, Random, WinStayLooseShift, Benjo]  # Add more strategies as needed
-# strategies = [AlwaysDefect, Benjo]
-games = random.randint(200, 1000)
-tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
+              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce,
+              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]  # Add more strategies as needed
+games = 200
+
+# Introduced random elements
+# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss
+#               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+#               TitForTwoTats, WinStayLooseShift, Benjo, Shubik]  # Add more strategies as needed
+# games = random.randint(200, 1000)
+
+# Testing elements
+# strategies = [AlwaysCooperate, Shubik]
+
+tournament = Tournament(strategies, num_games_per_match=games, noise=False)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
