@@ -55,21 +55,12 @@ class GameRunner:
                 choice1 = self.generate_choice_noise(choice1)
                 choice2 = self.generate_choice_noise(choice2)
 
-            if choice1 == "Cooperate" and choice2 == "Cooperate":
-                player1_score += 3
-                player2_score += 3
-            elif choice1 == "Defect" and choice2 == "Cooperate":
-                player1_score += 5
-            elif choice1 == "Cooperate" and choice2 == "Defect":
-                player2_score += 5
-            elif choice1 == "Defect" and choice2 == "Defect":
-                player1_score += 1
-                player2_score += 1
+            player1_score += PayoffMatrix.calculate_payoff(choice1, choice2)
+            player2_score += PayoffMatrix.calculate_payoff(choice2, choice1)
 
             # Update the strategies with the opponent's previous choice
             self.player1.make_choice(choice2)
             self.player2.make_choice(choice1)
-            # print(f"{self.player1.name:<20} :: {choice1:<20} {self.player2.name:<20} :: {choice2:<10}")
 
         print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
 
@@ -100,7 +91,7 @@ games = 200
 #               TitForTwoTats, WinStayLooseShift, Benjo, Shubik]  # Add more strategies as needed
 # games = random.randint(200, 1000)
 
-# Testing elements
+# Testing games
 # strategies = [AlwaysCooperate, Shubik]
 
 tournament = Tournament(strategies, num_games_per_match=games, noise=False)  # Mess with the parameters if you want.

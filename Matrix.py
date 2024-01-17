@@ -12,16 +12,28 @@ class PayoffMatrix:
     Defect      |    T, S   |  P, P
 
     """
+
     @staticmethod
     def calculate_payoff(player_action, opponent_action):
         # Define the payoff matrix
+        score_matrix = {
+            ("Cooperate", "Cooperate"): 3,
+            ("Cooperate", "Defect"):    0,
+            ("Defect", "Cooperate"):    5,
+            ("Defect", "Defect"):       1
+        }
+        # Retrieve the payoff for the given actions
+        return score_matrix.get((player_action, opponent_action))
+
+    @staticmethod
+    def get_payoff_type(player_action, opponent_action):
+        # Define the payoff matrix
         payoff_matrix = {
             ("Cooperate", "Cooperate"): 'R',
-            ("Cooperate", "Defect"): 'S',
-            ("Defect", "Cooperate"): 'T',
-            ("Defect", "Defect"): 'P'
+            ("Cooperate", "Defect"):    'S',
+            ("Defect", "Cooperate"):    'T',
+            ("Defect", "Defect"):       'P'
         }
-
         # Retrieve the payoff for the given actions
         return payoff_matrix.get((player_action, opponent_action))
 

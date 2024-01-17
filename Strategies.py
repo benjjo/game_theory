@@ -395,7 +395,7 @@ class WinStayLooseShift(Strategy):
         return self.choice
 
     def make_choice(self, opp_choice):
-        payoff = PayoffMatrix.calculate_payoff(self.get_choice(), opp_choice)
+        payoff = PayoffMatrix.get_payoff_type(self.get_choice(), opp_choice)
         self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
 
 
@@ -421,7 +421,7 @@ class Benjo(Strategy):
         if self.opp_history[-2:].count("Defect") == 2:
             self.set_choice("Defect")
         else:
-            payoff = PayoffMatrix.calculate_payoff(self.get_choice(), opp_choice)
+            payoff = PayoffMatrix.get_payoff_type(self.get_choice(), opp_choice)
             self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
 
 
@@ -447,7 +447,8 @@ class Downing(Strategy):
     def make_choice(self, opp_choice):
         recent_opponent_moves = self.opponent_history[-10:]  # Adjust window size as needed
         try:
-            cooperate_ratio = sum(1 for move in recent_opponent_moves if move == "Cooperate") / len(recent_opponent_moves)
+            cooperate_ratio = sum(1 for move in recent_opponent_moves if move == "Cooperate") / \
+                              len(recent_opponent_moves)
             if cooperate_ratio >= self.cooperate_threshold:
                 self.set_choice("Cooperate")
             else:
