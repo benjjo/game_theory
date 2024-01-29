@@ -1,5 +1,6 @@
 import random
 from GameTools import *
+import statistics
 
 
 class Strategy:
@@ -172,17 +173,10 @@ class TidemanChieruzzi(Strategy):
     Tideman & Chieruzzi strategy
     This strategy begins by playing Tit For Tat and then things get slightly complicated:
     Every run of defections played by the opponent increases the number of defections that this strategy
-    retaliates with by 1. The opponent is given a ‘fresh start’ if:
-    - it is 10 points behind this strategy
-    - and it has not just started a run of defections
-    - and it has been at least 20 rounds since the last ‘fresh start’
-    - and there are more than 10 rounds remaining in the tournament
-    - and the total number of defections differs from a 50-50 random sample by at least 3.0 standard deviations.
+    retaliates with by 1.
     A ‘fresh start’ is a sequence of two co-operations followed by an assumption that the game has just
     started (everything is forgotten).
     See https://github.com/Axelrod-Python/Axelrod/issues/1105
-
-    WIP - 2024-Jan-13
     """
 
     def __init__(self):
@@ -203,18 +197,24 @@ class TidemanChieruzzi(Strategy):
         return self.choice
 
     def set_fresh_start_condition(self, my_choice, opp_choice):
-        """The opponent is given a ‘fresh start’ if it is 10 points behind this strategy"""
+        """The opponent is given a ‘fresh start’ if:
+            - it is 10 points behind this strategy
+            - and it has not just started a run of defections
+            - and it has been at least 20 rounds since the last ‘fresh start’
+            - and there are more than 10 rounds remaining in the tournament
+            - and the total number of defections differs from a 50-50 random sample by at least 3.0 standard deviations.
+            """
         self.fresh_start_counter += 1
         self.games_counter += 1
         self.my_points += Tools.calculate_payoff(my_choice, opp_choice)
         self.their_points += Tools.calculate_payoff(opp_choice, my_choice)
+
         return (
                 self.my_points - self.their_points >= 10
                 and self.history[-2:].count("Defect") == 2
                 and self.fresh_start_counter > 20
                 and self.games_counter < 190
-                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history)
-        )
+                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history))
 
     def make_choice(self, opp_choice):
         self.history.append(opp_choice)
@@ -457,6 +457,27 @@ class Benjo(Strategy):
         else:
             payoff = Tools.get_payoff_type(self.get_choice(), opp_choice)
             self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
+
+
+class BenjoTFT(Strategy):
+    """
+    Benjo's Tit For Tat.
+    Returns tit-for-tat based on the mode of the opponent's previous responses.
+    """
+
+    def __init__(self):
+        super().__init__("BenjoTFT", "Cooperate")
+        self.opp_history = list()
+
+    def set_choice(self, choice):
+        self.choice = choice
+
+    def get_choice(self):
+        return self.choice
+
+    def make_choice(self, opp_choice):
+        self.opp_history.append(opp_choice)
+        self.set_choice(statistics.mode(self.opp_history))
 
 
 class Downing(Strategy):

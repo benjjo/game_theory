@@ -12,6 +12,10 @@ class Tournament:
         self.noise = noise
 
     def run_tournament(self):
+        """
+        A fresh object is instantiated for each round.
+        :return: dict
+        """
         noise = self.noise
         for i, strategy1 in enumerate(self.strategy_classes):
             for j, strategy2 in enumerate(self.strategy_classes):
@@ -83,16 +87,16 @@ class GameRunner:
 # strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
 #               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce,
 #               TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]  # Add more strategies as needed
-games = 200
+# games = 200
 
 # Introduced random elements
-strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi,
-              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
-              TitForTwoTats, WinStayLooseShift, Benjo, Shubik]  # Add more strategies as needed
-# games = random.randint(200, 1000)
+strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
+               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+               TitForTwoTats, WinStayLooseShift, Benjo, Shubik, BenjoTFT]  # Add more strategies as needed
+games = random.randint(200, 1000)
 
 # Testing games
-# strategies = [AlwaysCooperate, Shubik]
+# strategies = [Random, BenjoTFT]
 
 tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
