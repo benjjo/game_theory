@@ -23,9 +23,13 @@ Subclass examples: `TitForTat` is a strategy that cooperates initially and then 
 # Example usage:
 I simply run the `prisoners_dilema.py` script in a python shell to retrieve the output. Or something like PyCharm/VS-Code/Jupyter-Lab will enable you to see the output printed to the screen. The below shows the code that is tacked onto the end of the script. Update to modify the output.  
 
-```
-strategies = [TitForTat, AlwaysDefect, SoftTitForTat, AlwaysCooperate, Friedman]  # Add more strategies as needed
-tournament = Tournament(strategies, num_games_per_match=200, noise=True)  # noise=False will remove random noise.
+```commandline
+strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
+              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
+
+games = random.randint(200, 1000)tournament = Tournament(strategies, num_games_per_match=200, noise=True)  # noise=False will remove random noise.
+
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
@@ -39,7 +43,7 @@ print('*'*44)
 ```
 
 # Example output
-```
+```commandline
 ********************************************
  Overall Scores, sorted by highest ranking:
 ********************************************
@@ -50,7 +54,7 @@ AlwaysDefect: 3837
 AlwaysCooperate: 3832
 ********************************************
 ```
-```
+```commandline
 ********************************************
  Overall Scores, sorted by highest ranking:
 ********************************************
@@ -64,8 +68,7 @@ AlwaysDefect: 5139
 Joss: 5090
 ********************************************
 ```
-```
-
+```commandline
 ********************************************
  Overall Scores, sorted by highest ranking:
 ********************************************
@@ -83,7 +86,32 @@ Friedman: 11051
 AlwaysDefect: 10284
 ********************************************
 ```
+```commandline
+********************************************
+ Overall Scores, sorted by highest ranking:
+********************************************
+Number of games: 970
 
+            ModalTFT: 88841
+     AlwaysCooperate: 83158
+             Downing: 82963
+          DefectOnce: 82716
+       TitForTwoTats: 82423
+            Nydegger: 81416
+   GenerousTitForTat: 76096
+               Benjo: 74409
+   WinStayLooseShift: 73454
+           TitForTat: 73088
+              Random: 72668
+            Friedman: 70091
+           Graaskamp: 69659
+                Joss: 65809
+        AlwaysDefect: 65510
+    TidemanChieruzzi: 64452
+              Shubik: 61623
+********************************************
+
+```
 # References
 Malik, A. (2020). Strategies for the Iterated Prisoner’s Dilemma. November 2020. Retrieved from https://arxiv.org/pdf/2111.11561.pdf
 

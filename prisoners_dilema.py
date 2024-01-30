@@ -91,12 +91,15 @@ class GameRunner:
 
 # Introduced random elements
 strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
-               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
-               TitForTwoTats, WinStayLooseShift, Benjo, Shubik, BenjoTFT]  # Add more strategies as needed
+              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
+
+#strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, Random,
+#              AlwaysCooperate, DefectOnce, TitForTwoTats, ModalTFT]  # Add more strategies as needed
 games = random.randint(200, 1000)
 
 # Testing games
-# strategies = [Random, BenjoTFT]
+# strategies = [Random, ModalTFT]
 
 tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()

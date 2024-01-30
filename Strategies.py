@@ -459,14 +459,15 @@ class Benjo(Strategy):
             self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
 
 
-class BenjoTFT(Strategy):
+class ModalTFT(Strategy):
     """
     Benjo's Tit For Tat.
     Returns tit-for-tat based on the mode of the opponent's previous responses.
+    It seems to do pretty well.
     """
 
     def __init__(self):
-        super().__init__("BenjoTFT", "Cooperate")
+        super().__init__("ModalTFT", "Cooperate")
         self.opp_history = list()
 
     def set_choice(self, choice):
