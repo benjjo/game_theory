@@ -1,5 +1,5 @@
 import random
-from GameTools import *
+from GameTools import Tools
 import statistics
 
 
@@ -253,10 +253,7 @@ class Nydegger(Strategy):
 
     def make_choice(self, opp_choice):
         self.history.append(opp_choice)
-        if self.history[-5:].count("Defect") >= 3:
-            self.set_choice("Defect")
-        else:
-            self.set_choice("Cooperate")
+        self.set_choice(statistics.mode(self.history[-5:]))
 
 
 class TitForTwoTats(Strategy):

@@ -94,7 +94,7 @@ strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi
               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
               TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
 
-#strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, Random,
+# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, Random,
 #              AlwaysCooperate, DefectOnce, TitForTwoTats, ModalTFT]  # Add more strategies as needed
 games = random.randint(200, 1000)
 
