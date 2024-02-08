@@ -6,18 +6,20 @@ import statistics
 class Strategy:
     def __init__(self, name, init_choice):
         self.name = name
-        self.choice = init_choice
+        self._choice = init_choice
 
-    def set_choice(self, choice):
-        """The choice parameter is set by the run_game method within the GameRunner class. This is the previous choice
-        set by the opponent."""
-        self.choice = choice
+    @property
+    def choice(self):
         raise NotImplementedError("Subclasses must implement the set_choice method")
 
-    def get_choice(self):
-        raise NotImplementedError("Subclasses must implement the get_choice method")
+    @choice.setter
+    def choice(self, value):
+        """The choice parameter is set by the run_game method within the GameRunner class. This is the previous choice
+        set by the opponent."""
+        self._choice = value
+        raise NotImplementedError("Subclasses must implement the set_choice method")
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         raise NotImplementedError("Subclasses must implement the make_choice method")
 
 
@@ -29,14 +31,16 @@ class TitForTat(Strategy):
     def __init__(self):
         super().__init__("TitForTat", "Cooperate")
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
-        self.set_choice(opp_choice)
+    def strategy(self, opp_choice):
+        self.choice = opp_choice
 
 
 class AlwaysDefect(Strategy):
@@ -48,14 +52,16 @@ class AlwaysDefect(Strategy):
     def __init__(self):
         super().__init__("AlwaysDefect", "Defect")
 
-    def get_choice(self):
-        return "Defect"
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, choice):
-        pass
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
-        pass
+    def strategy(self, opp_choice):
+        self.choice = "Defect"
 
 
 class AlwaysCooperate(Strategy):
@@ -66,14 +72,16 @@ class AlwaysCooperate(Strategy):
     def __init__(self):
         super().__init__("AlwaysCooperate", "Cooperate")
 
-    def get_choice(self):
-        return "Cooperate"
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, choice):
-        pass
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
-        pass
+    def strategy(self, opp_choice):
+        self.choice = "Cooperate"
 
 
 class GenerousTitForTat(Strategy):
@@ -86,20 +94,20 @@ class GenerousTitForTat(Strategy):
         super().__init__("GenerousTitForTat", "Cooperate")
         self.historic_choices = list()
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
+    @choice.setter
+    def choice(self, new_choice):
         self.historic_choices.append(new_choice)
-        self.choice = new_choice
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         if self.historic_choices[-10:].count('Defect') >= 10:
-            self.set_choice("Cooperate")
-        elif opp_choice == "Cooperate":
-            self.set_choice("Cooperate")
+            self.choice = "Cooperate"
         else:
-            self.set_choice("Defect")
+            self.choice = opp_choice
 
 
 class Friedman(Strategy):
@@ -110,62 +118,66 @@ class Friedman(Strategy):
         super().__init__("Friedman", "Cooperate")
         self.historic_opponent_choices = list()
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.historic_opponent_choices.append(opp_choice)
         if 'Defect' in self.historic_opponent_choices:
-            self.set_choice("Defect")
-        elif opp_choice == "Cooperate":
-            self.set_choice("Cooperate")
+            self.choice = "Defect"
         else:
-            self.set_choice("Defect")
+            self.choice = "Cooperate"
 
 
 class Joss(Strategy):
-    """Similar to Tit-For-tat in that it will start out as Cooperative, but will always mimic the opponent from that
-    point onward. However, as a sneaky little side hustle, Joss will Defect around 10% of the time."""
+    """Similar to Tit-For-tat in that it will start out as Cooperative and will mimic the opponent.
+    However, as a sneaky little side hustle, Joss will Defect around 10% of the time."""
 
     def __init__(self):
         super().__init__("Joss", "Cooperate")
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         if random.randint(1, 10) == 1:
-            self.set_choice("Defect")
+            self.choice = "Defect"
         else:
-            self.set_choice(opp_choice)
+            self.choice = opp_choice
 
 
 class Graaskamp(Strategy):
-    """Similar to Joss in that it will start out as Cooperative, but will always mimic the opponent from that
-    point onward. However, Graaskamp will defect every 50th round."""
+    """Similar to Joss in that it will start out as Cooperative and mimic the opponent.
+    However, Graaskamp will defect every 50th round."""
 
     def __init__(self):
         super().__init__("Graaskamp", "Cooperate")
         self.round = int()
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.round += 1
         if self.round % 50 == 0:
-            self.set_choice("Defect")
+            self.choice = "Defect"
         else:
-            self.set_choice(opp_choice)
+            self.choice = opp_choice
 
 
 class TidemanChieruzzi(Strategy):
@@ -190,11 +202,13 @@ class TidemanChieruzzi(Strategy):
         self.history = list()
         self.games_counter = 0
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
     def set_fresh_start_condition(self, my_choice, opp_choice):
         """The opponent is given a ‘fresh start’ if:
@@ -216,9 +230,9 @@ class TidemanChieruzzi(Strategy):
                 and self.games_counter < 190
                 and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history))
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.history.append(opp_choice)
-        self.set_fresh_start_condition(self.get_choice(), opp_choice)
+        self.set_fresh_start_condition(self.choice, opp_choice)
 
         if opp_choice == "Defect":
             self.retaliations += 1
@@ -229,7 +243,8 @@ class TidemanChieruzzi(Strategy):
 
         if self.fresh_start:
             self.retaliation_counter = 0
-        self.set_choice("Defect" if self.retaliation_counter else "Cooperate")
+
+        self.choice = ("Defect" if self.retaliation_counter else "Cooperate")
 
 
 class Nydegger(Strategy):
@@ -245,15 +260,17 @@ class Nydegger(Strategy):
         super().__init__("Nydegger", "Cooperate")
         self.history = list()
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.history.append(opp_choice)
-        self.set_choice(statistics.mode(self.history[-5:]))
+        self.choice = statistics.mode(self.history[-5:])
 
 
 class TitForTwoTats(Strategy):
@@ -269,18 +286,20 @@ class TitForTwoTats(Strategy):
         super().__init__("TitForTwoTats", "Cooperate")
         self.history = list()
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.history.append(opp_choice)
         if self.history[-2:].count("Defect") == 2:
-            self.set_choice("Defect")
+            self.choice = "Defect"
         else:
-            self.set_choice("Cooperate")
+            self.choice = "Cooperate"
 
 
 class Random(Strategy):
@@ -289,14 +308,16 @@ class Random(Strategy):
     def __init__(self):
         super().__init__("Random", "Cooperate")
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
-        self.set_choice(random.choice(["Defect", "Cooperate"]))
+    def strategy(self, opp_choice):
+        self.choice = random.choice(["Defect", "Cooperate"])
 
 
 class Grofman(Strategy):
@@ -341,13 +362,15 @@ class Grofman(Strategy):
     def __init__(self):
         super().__init__("Grofman", "Cooperate")
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         pass
 
 
@@ -367,13 +390,15 @@ class Shubik(Strategy):
         self.retaliation_counter = 0
         self.retaliations = 0
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         if opp_choice == "Defect":
             self.retaliations += 1
             self.retaliation_counter = self.retaliations  # start the retaliations counter again
@@ -381,7 +406,7 @@ class Shubik(Strategy):
             if self.retaliation_counter > 0:
                 self.retaliation_counter -= 1
 
-        self.set_choice("Defect" if self.retaliation_counter else "Cooperate")
+        self.choice = ("Defect" if self.retaliation_counter else "Cooperate")
 
 
 class SteinRapoport(Strategy):
@@ -392,13 +417,15 @@ class SteinRapoport(Strategy):
     def __init__(self):
         super().__init__("SteinRapoport", "Cooperate")
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         pass
 
 
@@ -419,15 +446,17 @@ class WinStayLooseShift(Strategy):
     def __init__(self):
         super().__init__("WinStayLooseShift", "Cooperate")
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
-        payoff = Tools.get_payoff_type(self.get_choice(), opp_choice)
-        self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
+    def strategy(self, opp_choice):
+        payoff = Tools.get_payoff_type(self.choice, opp_choice)
+        self.choice = ('Cooperate' if payoff in ['R', 'T', 'P'] else 'Defect')
 
 
 class Benjo(Strategy):
@@ -441,19 +470,21 @@ class Benjo(Strategy):
         super().__init__("Benjo", "Cooperate")
         self.opp_history = list()
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.opp_history.append(opp_choice)
         if self.opp_history[-2:].count("Defect") == 2:
-            self.set_choice("Defect")
+            self.choice = "Defect"
         else:
-            payoff = Tools.get_payoff_type(self.get_choice(), opp_choice)
-            self.set_choice('Cooperate') if payoff in ['R', 'T', 'P'] else self.set_choice('Defect')
+            payoff = Tools.get_payoff_type(self.choice, opp_choice)
+            self.choice = ('Cooperate' if payoff in ['R', 'T', 'P'] else 'Defect')
 
 
 class ModalTFT(Strategy):
@@ -467,15 +498,43 @@ class ModalTFT(Strategy):
         super().__init__("ModalTFT", "Cooperate")
         self.opp_history = list()
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         self.opp_history.append(opp_choice)
-        self.set_choice(statistics.mode(self.opp_history))
+        self.choice = statistics.mode(self.opp_history)
+
+
+class ModalDefector(Strategy):
+    """
+    Benjo's Defector.
+    Will defect on a cooperative response and return the mode on a Defect response.
+    """
+
+    def __init__(self):
+        super().__init__("ModalDefector", "Defect")
+        self.opp_history = list()
+
+    @property
+    def choice(self):
+        return self._choice
+
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
+
+    def strategy(self, opp_choice):
+        self.opp_history.append(opp_choice)
+        if self.opp_history[-1] == "Cooperate":
+            self.choice = "Defect"
+        else:
+            self.choice = statistics.mode(self.opp_history)
 
 
 class Downing(Strategy):
@@ -491,23 +550,25 @@ class Downing(Strategy):
         self.opponent_history = list()
         self.cooperate_threshold = 0.7  # Adjust as needed
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         recent_opponent_moves = self.opponent_history[-10:]  # Adjust window size as needed
         try:
             cooperate_ratio = sum(1 for move in recent_opponent_moves if move == "Cooperate") / \
                               len(recent_opponent_moves)
             if cooperate_ratio >= self.cooperate_threshold:
-                self.set_choice("Cooperate")
+                self.choice = "Cooperate"
             else:
-                self.set_choice("Defect")
+                self.choice = "Defect"
         except ZeroDivisionError:
-            self.set_choice("Cooperate")
+            self.choice = "Cooperate"
 
 
 class Feld(Strategy):
@@ -518,13 +579,15 @@ class Feld(Strategy):
     def __init__(self):
         super().__init__("Feld", "Cooperate")
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         pass
 
 
@@ -536,13 +599,15 @@ class Tullock(Strategy):
     def __init__(self):
         super().__init__("Tullock", "Cooperate")
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         pass
 
 
@@ -554,13 +619,15 @@ class NameWithheld(Strategy):
     def __init__(self):
         super().__init__("NameWithheld", "Cooperate")
 
-    def set_choice(self, choice):
-        self.choice = choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def get_choice(self):
-        return self.choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
+    def strategy(self, opp_choice):
         pass
 
 
@@ -570,12 +637,14 @@ class DefectOnce(Strategy):
     def __init__(self):
         super().__init__("DefectOnce", "Defect")
 
-    def get_choice(self):
-        return self.choice
+    @property
+    def choice(self):
+        return self._choice
 
-    def set_choice(self, new_choice):
-        self.choice = new_choice
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
 
-    def make_choice(self, opp_choice):
-        self.set_choice("Cooperate")
+    def strategy(self, opp_choice):
+        self.choice = "Cooperate"
 

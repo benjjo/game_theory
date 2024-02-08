@@ -51,8 +51,8 @@ class GameRunner:
         player2_score = 0
 
         for i in range(self.num_games):
-            choice1 = self.player1.get_choice()
-            choice2 = self.player2.get_choice()
+            choice1 = self.player1.choice
+            choice2 = self.player2.choice
 
             if self.noise:
                 # If noise is set to True, this will introduce a 1% chance of the choice being flipped.
@@ -64,8 +64,8 @@ class GameRunner:
             player2_score += Tools.calculate_payoff(choice2, choice1)
 
             # Update the strategies with the opponent's previous choice
-            self.player1.make_choice(choice2)
-            self.player2.make_choice(choice1)
+            self.player1.strategy(choice2)
+            self.player2.strategy(choice1)
 
         print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
         return self.player1, player1_score, self.player2, player2_score
