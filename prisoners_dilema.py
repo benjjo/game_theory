@@ -5,7 +5,7 @@ class Tournament:
     """Runs a tournament of X amount of games, where the strategies are played against each other in a round-robin
     type of tournament. Scores are then printed to the screen.
     Noise can be introduced by setting the noise parameter to True."""
-    def __init__(self, strategy_classes, num_games_per_match=200, noise=True):
+    def __init__(self, strategy_classes, num_games_per_match=200, noise=False):
         self.strategy_classes = strategy_classes
         self.num_games_per_match = num_games_per_match
         self.scores = {strategy_class.__name__: 0 for strategy_class in strategy_classes}
@@ -83,20 +83,20 @@ class GameRunner:
 
 # Example usage:
 
-# No random elements
-# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat,
-#               AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce,
-#               TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]  # Add more strategies as needed
-# games = 200
+# No random elements # Add more strategies as needed
+strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, ModalTFT, AlwaysCooperate, Friedman, Graaskamp,
+              Nydegger, DefectOnce, TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]
+
 
 # Introduced random elements
-strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
-              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
-              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
+# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
+#              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+#              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
 
 # strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, Random,
 #              AlwaysCooperate, DefectOnce, TitForTwoTats, ModalTFT]  # Add more strategies as needed
-games = random.randint(200, 1000)
+# games = random.randint(200, 1000)
+games = 2000
 
 # Testing games
 # strategies = [Random, ModalTFT]

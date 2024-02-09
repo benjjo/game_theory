@@ -490,8 +490,9 @@ class Benjo(Strategy):
 class ModalTFT(Strategy):
     """
     Benjo's Tit For Tat.
-    Returns tit-for-tat based on the mode of the opponent's previous responses.
-    It seems to do pretty well.
+    Returns Cooperation with Cooperation. In the case of an opponent Defect, ModalTFT will return with the mode
+    of opponent's history.
+
     """
 
     def __init__(self):
@@ -508,7 +509,10 @@ class ModalTFT(Strategy):
 
     def strategy(self, opp_choice):
         self.opp_history.append(opp_choice)
-        self.choice = statistics.mode(self.opp_history)
+        if self.opp_history[-1] == "Cooperate":
+            self.choice = "Cooperate"
+        else:
+            self.choice = statistics.mode(self.opp_history)
 
 
 class ModalDefector(Strategy):
