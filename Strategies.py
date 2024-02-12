@@ -7,6 +7,7 @@ class Strategy:
     def __init__(self, name, init_choice):
         self.name = name
         self._choice = init_choice
+        self.opp_history = list()
 
     @property
     def choice(self):
@@ -116,7 +117,6 @@ class Friedman(Strategy):
 
     def __init__(self):
         super().__init__("Friedman", "Cooperate")
-        self.historic_opponent_choices = list()
 
     @property
     def choice(self):
@@ -127,8 +127,7 @@ class Friedman(Strategy):
         self._choice = new_choice
 
     def strategy(self, opp_choice):
-        self.historic_opponent_choices.append(opp_choice)
-        if 'Defect' in self.historic_opponent_choices:
+        if 'Defect' in self.opp_history:
             self.choice = "Defect"
         else:
             self.choice = "Cooperate"
@@ -199,7 +198,7 @@ class TidemanChieruzzi(Strategy):
         self.fresh_start_counter = 0
         self.my_points = 0
         self.their_points = 0
-        self.history = list()
+        self.own_history = list()
         self.games_counter = 0
 
     @property
@@ -225,13 +224,13 @@ class TidemanChieruzzi(Strategy):
 
         return (
                 self.my_points - self.their_points >= 10
-                and self.history[-2:].count("Defect") == 2
+                and self.own_history[-2:].count("Defect") == 2
                 and self.fresh_start_counter > 20
                 and self.games_counter < 190
-                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history))
+                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.own_history))
 
     def strategy(self, opp_choice):
-        self.history.append(opp_choice)
+        self.own_history.append(opp_choice)
         self.set_fresh_start_condition(self.choice, opp_choice)
 
         if opp_choice == "Defect":
@@ -258,7 +257,6 @@ class Nydegger(Strategy):
 
     def __init__(self):
         super().__init__("Nydegger", "Cooperate")
-        self.history = list()
 
     @property
     def choice(self):
@@ -269,8 +267,8 @@ class Nydegger(Strategy):
         self._choice = new_choice
 
     def strategy(self, opp_choice):
-        self.history.append(opp_choice)
-        self.choice = statistics.mode(self.history[-5:])
+        self.opp_history.append(opp_choice)
+        self.choice = statistics.mode(self.opp_history[-5:])
 
 
 class TitForTwoTats(Strategy):
@@ -284,7 +282,6 @@ class TitForTwoTats(Strategy):
 
     def __init__(self):
         super().__init__("TitForTwoTats", "Cooperate")
-        self.history = list()
 
     @property
     def choice(self):
@@ -295,8 +292,8 @@ class TitForTwoTats(Strategy):
         self._choice = new_choice
 
     def strategy(self, opp_choice):
-        self.history.append(opp_choice)
-        if self.history[-2:].count("Defect") == 2:
+        self.opp_history.append(opp_choice)
+        if self.opp_history[-2:].count("Defect") == 2:
             self.choice = "Defect"
         else:
             self.choice = "Cooperate"
@@ -468,7 +465,6 @@ class Benjo(Strategy):
 
     def __init__(self):
         super().__init__("Benjo", "Cooperate")
-        self.opp_history = list()
 
     @property
     def choice(self):
@@ -492,12 +488,10 @@ class ModalTFT(Strategy):
     Benjo's Tit For Tat.
     Returns Cooperation with Cooperation. In the case of an opponent Defect, ModalTFT will return with the mode
     of opponent's history.
-
     """
 
     def __init__(self):
         super().__init__("ModalTFT", "Cooperate")
-        self.opp_history = list()
 
     @property
     def choice(self):
@@ -523,7 +517,6 @@ class ModalDefector(Strategy):
 
     def __init__(self):
         super().__init__("ModalDefector", "Defect")
-        self.opp_history = list()
 
     @property
     def choice(self):
@@ -551,7 +544,6 @@ class Downing(Strategy):
 
     def __init__(self):
         super().__init__("Downing", "Cooperate")
-        self.opponent_history = list()
         self.cooperate_threshold = 0.7  # Adjust as needed
 
     @property
@@ -563,7 +555,7 @@ class Downing(Strategy):
         self._choice = new_choice
 
     def strategy(self, opp_choice):
-        recent_opponent_moves = self.opponent_history[-10:]  # Adjust window size as needed
+        recent_opponent_moves = self.opp_history[-10:]  # Adjust window size as needed
         try:
             cooperate_ratio = sum(1 for move in recent_opponent_moves if move == "Cooperate") / \
                               len(recent_opponent_moves)

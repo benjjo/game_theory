@@ -67,6 +67,10 @@ class GameRunner:
             self.player1.strategy(choice2)
             self.player2.strategy(choice1)
 
+            # Update the historical data after the choices have been made
+            self.player1.opp_history.append(choice2)
+            self.player2.opp_history.append(choice1)
+
         print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
         return self.player1, player1_score, self.player2, player2_score
 
