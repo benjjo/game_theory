@@ -1,6 +1,4 @@
 from Strategies import *
-C = "Cooperate"
-D = "Defect"
 
 
 class Tournament:
