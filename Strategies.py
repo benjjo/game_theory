@@ -1,13 +1,15 @@
 import random
 from GameTools import Tools
 import statistics
+C = "Cooperate"
+D = "Defect"
 
 
 class Strategy:
     def __init__(self, name, init_choice):
         self.name = name
         self._choice = init_choice
-        self.opp_history = list()
+        self.history = {'own': [], 'opp': []}
 
     @property
     def choice(self):
@@ -20,6 +22,11 @@ class Strategy:
         self._choice = value
         raise NotImplementedError("Subclasses must implement the set_choice method")
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+        raise NotImplementedError("Subclasses must implement the set_choice method")
+
     def strategy(self, opp_choice):
         raise NotImplementedError("Subclasses must implement the make_choice method")
 
@@ -30,7 +37,7 @@ class TitForTat(Strategy):
      A 'NICE' strategy in that we start peacefully until provoked."""
 
     def __init__(self):
-        super().__init__("TitForTat", "Cooperate")
+        super().__init__("TitForTat", C)
 
     @property
     def choice(self):
@@ -39,6 +46,10 @@ class TitForTat(Strategy):
     @choice.setter
     def choice(self, new_choice):
         self._choice = new_choice
+
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
 
     def strategy(self, opp_choice):
         self.choice = opp_choice
@@ -51,7 +62,7 @@ class AlwaysDefect(Strategy):
     A 'NOT NICE' strategy in that we start and end with provocation."""
 
     def __init__(self):
-        super().__init__("AlwaysDefect", "Defect")
+        super().__init__("AlwaysDefect", D)
 
     @property
     def choice(self):
@@ -61,8 +72,12 @@ class AlwaysDefect(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.choice = "Defect"
+        self.choice = D
 
 
 class AlwaysCooperate(Strategy):
@@ -71,7 +86,7 @@ class AlwaysCooperate(Strategy):
      A 'NICE' strategy in that we start and end peacefully."""
 
     def __init__(self):
-        super().__init__("AlwaysCooperate", "Cooperate")
+        super().__init__("AlwaysCooperate", C)
 
     @property
     def choice(self):
@@ -81,8 +96,12 @@ class AlwaysCooperate(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.choice = "Cooperate"
+        self.choice = C
 
 
 class GenerousTitForTat(Strategy):
@@ -92,8 +111,8 @@ class GenerousTitForTat(Strategy):
     sacrifice a move for the greater good."""
 
     def __init__(self):
-        super().__init__("GenerousTitForTat", "Cooperate")
-        self.historic_choices = list()
+        super().__init__("GenerousTitForTat", C)
+        # self.historic_choices = list()
 
     @property
     def choice(self):
@@ -101,13 +120,20 @@ class GenerousTitForTat(Strategy):
 
     @choice.setter
     def choice(self, new_choice):
-        self.historic_choices.append(new_choice)
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        if self.historic_choices[-10:].count('Defect') >= 10:
-            self.choice = "Cooperate"
-        else:
+        # Check own historical selections and make a choice
+        try:
+            if self.history['own'][-10:].count(D) >= 10:
+                self.choice = C
+            else:
+                self.choice = opp_choice
+        except IndexError:
             self.choice = opp_choice
 
 
@@ -116,7 +142,7 @@ class Friedman(Strategy):
      A 'NICE' strategy in that we start peacefully until provoked. Once provoked it is unforgiving"""
 
     def __init__(self):
-        super().__init__("Friedman", "Cooperate")
+        super().__init__("Friedman", C)
 
     @property
     def choice(self):
@@ -126,11 +152,15 @@ class Friedman(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        if 'Defect' in self.opp_history:
-            self.choice = "Defect"
+        if D in self.history['opp']:
+            self.choice = D
         else:
-            self.choice = "Cooperate"
+            self.choice = C
 
 
 class Joss(Strategy):
@@ -138,7 +168,7 @@ class Joss(Strategy):
     However, as a sneaky little side hustle, Joss will Defect around 10% of the time."""
 
     def __init__(self):
-        super().__init__("Joss", "Cooperate")
+        super().__init__("Joss", C)
 
     @property
     def choice(self):
@@ -148,9 +178,13 @@ class Joss(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
         if random.randint(1, 10) == 1:
-            self.choice = "Defect"
+            self.choice = D
         else:
             self.choice = opp_choice
 
@@ -160,7 +194,7 @@ class Graaskamp(Strategy):
     However, Graaskamp will defect every 50th round."""
 
     def __init__(self):
-        super().__init__("Graaskamp", "Cooperate")
+        super().__init__("Graaskamp", C)
         self.round = int()
 
     @property
@@ -171,10 +205,14 @@ class Graaskamp(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
         self.round += 1
         if self.round % 50 == 0:
-            self.choice = "Defect"
+            self.choice = D
         else:
             self.choice = opp_choice
 
@@ -191,15 +229,15 @@ class TidemanChieruzzi(Strategy):
     """
 
     def __init__(self):
-        super().__init__("TidemanChieruzzi", "Cooperate")
+        super().__init__("TidemanChieruzzi", C)
         self.retaliation_counter = 0
         self.retaliations = 0
         self.fresh_start = bool()
         self.fresh_start_counter = 0
         self.my_points = 0
         self.their_points = 0
-        self.own_history = list()
         self.games_counter = 0
+        self.own_defect_history = bool()
 
     @property
     def choice(self):
@@ -208,6 +246,10 @@ class TidemanChieruzzi(Strategy):
     @choice.setter
     def choice(self, new_choice):
         self._choice = new_choice
+
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
 
     def set_fresh_start_condition(self, my_choice, opp_choice):
         """The opponent is given a ‘fresh start’ if:
@@ -221,19 +263,22 @@ class TidemanChieruzzi(Strategy):
         self.games_counter += 1
         self.my_points += Tools.calculate_payoff(my_choice, opp_choice)
         self.their_points += Tools.calculate_payoff(opp_choice, my_choice)
+        try:
+            self.own_defect_history = self.history['own'][-2:].count(D) == 2
+        except IndexError:
+            self.own_defect_history = False
 
         return (
                 self.my_points - self.their_points >= 10
-                and self.own_history[-2:].count("Defect") == 2
+                and self.own_defect_history
                 and self.fresh_start_counter > 20
                 and self.games_counter < 190
-                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.own_history))
+                and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history['own']))
 
     def strategy(self, opp_choice):
-        self.own_history.append(opp_choice)
         self.set_fresh_start_condition(self.choice, opp_choice)
 
-        if opp_choice == "Defect":
+        if opp_choice == D:
             self.retaliations += 1
             self.retaliation_counter = self.retaliations  # start the retaliations counter again
         else:
@@ -243,7 +288,7 @@ class TidemanChieruzzi(Strategy):
         if self.fresh_start:
             self.retaliation_counter = 0
 
-        self.choice = ("Defect" if self.retaliation_counter else "Cooperate")
+        self.choice = (D if self.retaliation_counter else C)
 
 
 class Nydegger(Strategy):
@@ -256,7 +301,7 @@ class Nydegger(Strategy):
         Otherwise, it will cooperate."""
 
     def __init__(self):
-        super().__init__("Nydegger", "Cooperate")
+        super().__init__("Nydegger", C)
 
     @property
     def choice(self):
@@ -266,9 +311,15 @@ class Nydegger(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.opp_history.append(opp_choice)
-        self.choice = statistics.mode(self.opp_history[-5:])
+        if len(self.history['opp']) >= 5:
+            self.choice = statistics.mode(self.history['opp'][-5:])
+        else:
+            self.choice = C
 
 
 class TitForTwoTats(Strategy):
@@ -281,7 +332,7 @@ class TitForTwoTats(Strategy):
         Otherwise, it will cooperate."""
 
     def __init__(self):
-        super().__init__("TitForTwoTats", "Cooperate")
+        super().__init__("TitForTwoTats", C)
 
     @property
     def choice(self):
@@ -291,19 +342,25 @@ class TitForTwoTats(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.opp_history.append(opp_choice)
-        if self.opp_history[-2:].count("Defect") == 2:
-            self.choice = "Defect"
+        if len(self.history['opp']) >= 2:
+            if self.history['opp'][-2:].count(D) == 2:
+                self.choice = D
+            else:
+                self.choice = C
         else:
-            self.choice = "Cooperate"
+            self.choice = C
 
 
 class Random(Strategy):
     """Straight up random"""
 
     def __init__(self):
-        super().__init__("Random", "Cooperate")
+        super().__init__("Random", C)
 
     @property
     def choice(self):
@@ -313,8 +370,12 @@ class Random(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.choice = random.choice(["Defect", "Cooperate"])
+        self.choice = random.choice([D, C])
 
 
 class Grofman(Strategy):
@@ -357,7 +418,7 @@ class Grofman(Strategy):
     """
 
     def __init__(self):
-        super().__init__("Grofman", "Cooperate")
+        super().__init__("Grofman", C)
 
     @property
     def choice(self):
@@ -366,6 +427,10 @@ class Grofman(Strategy):
     @choice.setter
     def choice(self, new_choice):
         self._choice = new_choice
+
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
 
     def strategy(self, opp_choice):
         pass
@@ -383,7 +448,7 @@ class Shubik(Strategy):
     """
 
     def __init__(self):
-        super().__init__("Shubik", "Cooperate")
+        super().__init__("Shubik", C)
         self.retaliation_counter = 0
         self.retaliations = 0
 
@@ -395,15 +460,19 @@ class Shubik(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        if opp_choice == "Defect":
+        if opp_choice == D:
             self.retaliations += 1
             self.retaliation_counter = self.retaliations  # start the retaliations counter again
         else:
             if self.retaliation_counter > 0:
                 self.retaliation_counter -= 1
 
-        self.choice = ("Defect" if self.retaliation_counter else "Cooperate")
+        self.choice = (D if self.retaliation_counter else C)
 
 
 class SteinRapoport(Strategy):
@@ -412,7 +481,7 @@ class SteinRapoport(Strategy):
     """
 
     def __init__(self):
-        super().__init__("SteinRapoport", "Cooperate")
+        super().__init__("SteinRapoport", C)
 
     @property
     def choice(self):
@@ -421,6 +490,10 @@ class SteinRapoport(Strategy):
     @choice.setter
     def choice(self, new_choice):
         self._choice = new_choice
+
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
 
     def strategy(self, opp_choice):
         pass
@@ -441,7 +514,7 @@ class WinStayLooseShift(Strategy):
     """
 
     def __init__(self):
-        super().__init__("WinStayLooseShift", "Cooperate")
+        super().__init__("WinStayLooseShift", C)
 
     @property
     def choice(self):
@@ -451,9 +524,13 @@ class WinStayLooseShift(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
         payoff = Tools.get_payoff_type(self.choice, opp_choice)
-        self.choice = ('Cooperate' if payoff in ['R', 'T', 'P'] else 'Defect')
+        self.choice = (C if payoff in ['R', 'T', 'P'] else D)
 
 
 class Benjo(Strategy):
@@ -464,7 +541,7 @@ class Benjo(Strategy):
     """
 
     def __init__(self):
-        super().__init__("Benjo", "Cooperate")
+        super().__init__("Benjo", C)
 
     @property
     def choice(self):
@@ -474,13 +551,19 @@ class Benjo(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.opp_history.append(opp_choice)
-        if self.opp_history[-2:].count("Defect") == 2:
-            self.choice = "Defect"
+        if len(self.history['opp']) >= 2:
+            if self.history['opp'][-2:].count(D) == 2:
+                self.choice = D
+            else:
+                payoff = Tools.get_payoff_type(self.choice, opp_choice)
+                self.choice = (C if payoff in ['R', 'T', 'P'] else 'Defect')
         else:
-            payoff = Tools.get_payoff_type(self.choice, opp_choice)
-            self.choice = ('Cooperate' if payoff in ['R', 'T', 'P'] else 'Defect')
+            self.choice = C
 
 
 class ModalTFT(Strategy):
@@ -491,7 +574,7 @@ class ModalTFT(Strategy):
     """
 
     def __init__(self):
-        super().__init__("ModalTFT", "Cooperate")
+        super().__init__("ModalTFT", C)
 
     @property
     def choice(self):
@@ -501,12 +584,15 @@ class ModalTFT(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.opp_history.append(opp_choice)
-        if self.opp_history[-1] == "Cooperate":
-            self.choice = "Cooperate"
+        if self.history['opp'][-1] == C:
+            self.choice = C
         else:
-            self.choice = statistics.mode(self.opp_history)
+            self.choice = statistics.mode(self.history['opp'])
 
 
 class ModalDefector(Strategy):
@@ -516,7 +602,7 @@ class ModalDefector(Strategy):
     """
 
     def __init__(self):
-        super().__init__("ModalDefector", "Defect")
+        super().__init__("ModalDefector", D)
 
     @property
     def choice(self):
@@ -526,12 +612,15 @@ class ModalDefector(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        self.opp_history.append(opp_choice)
-        if self.opp_history[-1] == "Cooperate":
-            self.choice = "Defect"
+        if self.history['opp'][-1] == C:
+            self.choice = D
         else:
-            self.choice = statistics.mode(self.opp_history)
+            self.choice = statistics.mode(self.history['opp'])
 
 
 class Downing(Strategy):
@@ -543,7 +632,7 @@ class Downing(Strategy):
     """
 
     def __init__(self):
-        super().__init__("Downing", "Cooperate")
+        super().__init__("Downing", C)
         self.cooperate_threshold = 0.7  # Adjust as needed
 
     @property
@@ -554,17 +643,17 @@ class Downing(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
-        recent_opponent_moves = self.opp_history[-10:]  # Adjust window size as needed
-        try:
-            cooperate_ratio = sum(1 for move in recent_opponent_moves if move == "Cooperate") / \
-                              len(recent_opponent_moves)
+        if len(self.history['opp']) >= 10:
+            cooperate_ratio = sum(1 for move in self.history['opp'][-10:] if move == C) / 10
             if cooperate_ratio >= self.cooperate_threshold:
-                self.choice = "Cooperate"
+                self.choice = C
             else:
-                self.choice = "Defect"
-        except ZeroDivisionError:
-            self.choice = "Cooperate"
+                self.choice = D
 
 
 class Feld(Strategy):
@@ -582,6 +671,10 @@ class Feld(Strategy):
     @choice.setter
     def choice(self, new_choice):
         self._choice = new_choice
+
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
 
     def strategy(self, opp_choice):
         pass
@@ -603,6 +696,10 @@ class Tullock(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
         pass
 
@@ -623,6 +720,10 @@ class NameWithheld(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
         pass
 
@@ -641,6 +742,9 @@ class DefectOnce(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
+    def history_data(self, opp_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opp_choice)
+
     def strategy(self, opp_choice):
         self.choice = "Cooperate"
-

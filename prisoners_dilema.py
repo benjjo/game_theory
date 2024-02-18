@@ -1,4 +1,6 @@
 from Strategies import *
+C = "Cooperate"
+D = "Defect"
 
 
 class Tournament:
@@ -45,43 +47,50 @@ class GameRunner:
         self.player2 = player2
         self.num_games = num_games
         self.noise = noise
+        self.historical_data = list()
+        self.player_choice = str()
+        self.opponent_choice = str()
 
     def run_game(self):
         player1_score = 0
         player2_score = 0
 
         for i in range(self.num_games):
-            choice1 = self.player1.choice
-            choice2 = self.player2.choice
+            player1_choice = self.player1.choice
+            player2_choice = self.player2.choice
 
             if self.noise:
                 # If noise is set to True, this will introduce a 1% chance of the choice being flipped.
-                choice1 = GameRunner.generate_choice_noise(choice1)
-                choice2 = GameRunner.generate_choice_noise(choice2)
+                player1_choice = GameRunner.generate_choice_noise(player1_choice)
+                player2_choice = GameRunner.generate_choice_noise(player2_choice)
 
             # Update the rolling score using the scoring matrix.
-            player1_score += Tools.calculate_payoff(choice1, choice2)
-            player2_score += Tools.calculate_payoff(choice2, choice1)
-
-            # Update the strategies with the opponent's previous choice
-            self.player1.strategy(choice2)
-            self.player2.strategy(choice1)
+            player1_score += Tools.calculate_payoff(player1_choice, player2_choice)
+            player2_score += Tools.calculate_payoff(player2_choice, player1_choice)
 
             # Update the historical data after the choices have been made
-            self.player1.opp_history.append(choice2)
-            self.player2.opp_history.append(choice1)
+            self.player1.history_data(opp_choice=player2_choice, own_choice=player1_choice)
+            self.player2.history_data(opp_choice=player1_choice, own_choice=player2_choice)
+
+            # Run the strategies to set the next decision
+            self.player1.strategy(player2_choice)
+            self.player2.strategy(player1_choice)
 
         print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
         return self.player1, player1_score, self.player2, player2_score
+
+    def historic_manager(self, player, opponent):
+        self.player_choice = player
+        self.opponent_choice = opponent
 
     @staticmethod
     def generate_choice_noise(choice):
         # 1% chance the choice will be flipped. This will only be invoked if noise is set to True.
         if random.randint(1, 100) == 1:
-            if choice == "Defect":
-                return "Cooperate"
+            if choice == D:
+                return C
             else:
-                return "Defect"
+                return D
         return choice
 
 
