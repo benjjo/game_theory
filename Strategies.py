@@ -22,12 +22,12 @@ class Strategy:
         self._choice = value
         raise NotImplementedError("Subclasses must implement the set_choice method")
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
         raise NotImplementedError("Subclasses must implement the set_choice method")
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         raise NotImplementedError("Subclasses must implement the make_choice method")
 
 
@@ -47,12 +47,12 @@ class TitForTat(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
-        self.choice = opp_choice
+    def strategy(self):
+        self.choice = self.history['opp'][-1]
 
 
 class AlwaysDefect(Strategy):
@@ -72,11 +72,11 @@ class AlwaysDefect(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         self.choice = D
 
 
@@ -96,11 +96,11 @@ class AlwaysCooperate(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         self.choice = C
 
 
@@ -122,19 +122,19 @@ class GenerousTitForTat(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         # Check own historical selections and make a choice
         try:
             if self.history['own'][-10:].count(D) >= 10:
                 self.choice = C
             else:
-                self.choice = opp_choice
+                self.choice = self.history['opp'][-1]
         except IndexError:
-            self.choice = opp_choice
+            self.choice = self.history['opp'][-1]
 
 
 class Friedman(Strategy):
@@ -152,11 +152,12 @@ class Friedman(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
+        # print(D in self.history['opp'])
         if D in self.history['opp']:
             self.choice = D
         else:
@@ -178,15 +179,16 @@ class Joss(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         if random.randint(1, 10) == 1:
             self.choice = D
         else:
-            self.choice = opp_choice
+            if self.history['opp']:
+                self.choice = self.history['opp'][-1]
 
 
 class Graaskamp(Strategy):
@@ -205,16 +207,16 @@ class Graaskamp(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         self.round += 1
         if self.round % 50 == 0:
             self.choice = D
         else:
-            self.choice = opp_choice
+            self.choice = self.history['opp'][-1]
 
 
 class TidemanChieruzzi(Strategy):
@@ -247,9 +249,9 @@ class TidemanChieruzzi(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
     def set_fresh_start_condition(self, my_choice, opp_choice):
         """The opponent is given a ‘fresh start’ if:
@@ -275,10 +277,10 @@ class TidemanChieruzzi(Strategy):
                 and self.games_counter < 190
                 and Tools.compare_samples(Tools.random_5050_sample(self.games_counter, 0.7), self.history['own']))
 
-    def strategy(self, opp_choice):
-        self.set_fresh_start_condition(self.choice, opp_choice)
+    def strategy(self):
+        self.set_fresh_start_condition(self.choice, self.history['opp'][-1])
 
-        if opp_choice == D:
+        if self.history['opp'][-1] == D:
             self.retaliations += 1
             self.retaliation_counter = self.retaliations  # start the retaliations counter again
         else:
@@ -311,11 +313,11 @@ class Nydegger(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         if len(self.history['opp']) >= 5:
             self.choice = statistics.mode(self.history['opp'][-5:])
         else:
@@ -342,11 +344,11 @@ class TitForTwoTats(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         if len(self.history['opp']) >= 2:
             if self.history['opp'][-2:].count(D) == 2:
                 self.choice = D
@@ -370,11 +372,11 @@ class Random(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         self.choice = random.choice([D, C])
 
 
@@ -428,11 +430,11 @@ class Grofman(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         pass
 
 
@@ -460,19 +462,22 @@ class Shubik(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
-        if opp_choice == D:
+    def strategy(self):
+        if self.history['opp'][-1] == D:
             self.retaliations += 1
             self.retaliation_counter = self.retaliations  # start the retaliations counter again
+            self.choice = D
         else:
             if self.retaliation_counter > 0:
                 self.retaliation_counter -= 1
+            self.choice = (D if self.retaliation_counter else C)
 
-        self.choice = (D if self.retaliation_counter else C)
+        if self.retaliation_counter > 0:
+            self.retaliation_counter -= 1
 
 
 class SteinRapoport(Strategy):
@@ -491,11 +496,11 @@ class SteinRapoport(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         pass
 
 
@@ -515,6 +520,7 @@ class WinStayLooseShift(Strategy):
 
     def __init__(self):
         super().__init__("WinStayLooseShift", C)
+        self.payoff = 'R'
 
     @property
     def choice(self):
@@ -524,13 +530,14 @@ class WinStayLooseShift(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
-        payoff = Tools.get_payoff_type(self.choice, opp_choice)
-        self.choice = (C if payoff in ['R', 'T', 'P'] else D)
+    def strategy(self):
+        if self.history['opp']:
+            self.payoff = Tools.get_payoff_type(self.choice, self.history['opp'][-1])
+        self.choice = (C if self.payoff in ['R', 'T', 'P'] else D)
 
 
 class Benjo(Strategy):
@@ -551,16 +558,16 @@ class Benjo(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         if len(self.history['opp']) >= 2:
             if self.history['opp'][-2:].count(D) == 2:
                 self.choice = D
             else:
-                payoff = Tools.get_payoff_type(self.choice, opp_choice)
+                payoff = Tools.get_payoff_type(self.choice, self.history['opp'][-1])
                 self.choice = (C if payoff in ['R', 'T', 'P'] else 'Defect')
         else:
             self.choice = C
@@ -584,15 +591,16 @@ class ModalTFT(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
-        if self.history['opp'][-1] == C:
-            self.choice = C
-        else:
-            self.choice = statistics.mode(self.history['opp'])
+    def strategy(self):
+        if self.history['opp']:
+            if self.history['opp'][-1] == C:
+                self.choice = C
+            else:
+                self.choice = statistics.mode(self.history['opp'])
 
 
 class ModalDefector(Strategy):
@@ -612,11 +620,11 @@ class ModalDefector(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         if self.history['opp'][-1] == C:
             self.choice = D
         else:
@@ -643,11 +651,11 @@ class Downing(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         if len(self.history['opp']) >= 10:
             cooperate_ratio = sum(1 for move in self.history['opp'][-10:] if move == C) / 10
             if cooperate_ratio >= self.cooperate_threshold:
@@ -672,11 +680,11 @@ class Feld(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         pass
 
 
@@ -696,11 +704,11 @@ class Tullock(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         pass
 
 
@@ -720,11 +728,11 @@ class NameWithheld(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         pass
 
 
@@ -742,9 +750,9 @@ class DefectOnce(Strategy):
     def choice(self, new_choice):
         self._choice = new_choice
 
-    def history_data(self, opp_choice, own_choice):
+    def history_data(self, opponent_choice, own_choice):
         self.history['own'].append(own_choice)
-        self.history['opp'].append(opp_choice)
+        self.history['opp'].append(opponent_choice)
 
-    def strategy(self, opp_choice):
+    def strategy(self):
         self.choice = "Cooperate"
