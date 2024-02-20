@@ -1,25 +1,25 @@
-from Strategies import *
 from GameTools import Tournament
-
+from Strategies import *
 
 # No random elements # Add more strategies as needed
-strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, ModalTFT, AlwaysCooperate, Friedman, Graaskamp,
-              Nydegger, DefectOnce, TitForTwoTats, WinStayLooseShift, Benjo, Shubik, Downing]
+strategies_non_random = [TitForTat, AlwaysDefect, GenerousTitForTat, ModalTFT, AlwaysCooperate,
+                         Friedman, Graaskamp, Nydegger, DefectOnce, TitForTwoTats, WinStayLooseShift,
+                         Benjo, Shubik, Downing]
 
 # Introduced random elements
-# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
-#              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
-#              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
+strategies_random = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
+                     AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+                     TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]
 
-# strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, Random,
-#              AlwaysCooperate, DefectOnce, TitForTwoTats, ModalTFT]  # Add more strategies as needed
+strategies_all = [TitForTat, AlwaysDefect, AlwaysCooperate, GenerousTitForTat, Friedman,
+                  Joss, Graaskamp, TidemanChieruzzi, Nydegger, TitForTwoTats, Random, Shubik,
+                  WinStayLooseShift, Benjo, ModalTFT, ModalDefector, Downing]
+
 # games = random.randint(200, 1000)
 games = 2000
 
-# Testing games
-# strategies = [Random, ModalTFT]
-
-tournament = Tournament(strategies, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
+# Running games
+tournament = Tournament(strategies_all, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.run_tournament()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)

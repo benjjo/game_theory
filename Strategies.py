@@ -568,8 +568,7 @@ class Benjo(Strategy):
             if self.history['opp'][-2:].count(D) == 2:
                 self.choice = D
             else:
-                self.payoff = Tools.get_payoff_type(self.choice, self.history['opp'][-1])
-                self.choice = (C if self.payoff in ['R', 'P'] else D)
+                self.choice = statistics.mode(self.history['opp'])
         else:
             self.choice = C
 
@@ -626,10 +625,11 @@ class ModalDefector(Strategy):
         self.history['opp'].append(opponent_choice)
 
     def strategy(self):
-        if self.history['opp'][-1] == C:
-            self.choice = D
-        else:
-            self.choice = statistics.mode(self.history['opp'])
+        if self.history['opp']:
+            if self.history['opp'][-1] == C:
+                self.choice = D
+            else:
+                self.choice = statistics.mode(self.history['opp'])
 
 
 class Downing(Strategy):
@@ -658,7 +658,7 @@ class Downing(Strategy):
 
     def strategy(self):
         if len(self.history['opp']) >= 10:
-            cooperate_ratio = sum(1 for move in self.history['opp'][-10:] if move == C) / 10
+            cooperate_ratio = self.history['opp'][-10:].count(C) / 10
             if cooperate_ratio >= self.cooperate_threshold:
                 self.choice = C
             else:
@@ -671,7 +671,7 @@ class Feld(Strategy):
     """
 
     def __init__(self):
-        super().__init__("Feld", "Cooperate")
+        super().__init__("Feld", C)
 
     @property
     def choice(self):
@@ -695,7 +695,7 @@ class Tullock(Strategy):
     """
 
     def __init__(self):
-        super().__init__("Tullock", "Cooperate")
+        super().__init__("Tullock", C)
 
     @property
     def choice(self):
@@ -719,7 +719,7 @@ class NameWithheld(Strategy):
     """
 
     def __init__(self):
-        super().__init__("NameWithheld", "Cooperate")
+        super().__init__("NameWithheld", C)
 
     @property
     def choice(self):
@@ -741,7 +741,7 @@ class DefectOnce(Strategy):
     """Testing purposes only. Defects once then concedes."""
 
     def __init__(self):
-        super().__init__("DefectOnce", "Defect")
+        super().__init__("DefectOnce", D)
 
     @property
     def choice(self):
@@ -756,4 +756,26 @@ class DefectOnce(Strategy):
         self.history['opp'].append(opponent_choice)
 
     def strategy(self):
-        self.choice = "Cooperate"
+        self.choice = C
+
+
+class CooperateOnce(Strategy):
+    """Testing purposes only. Cooperates once then hates."""
+
+    def __init__(self):
+        super().__init__("CooperateOnce", C)
+
+    @property
+    def choice(self):
+        return self._choice
+
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
+
+    def history_data(self, opponent_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opponent_choice)
+
+    def strategy(self):
+        self.choice = D

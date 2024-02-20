@@ -305,7 +305,7 @@ class StrategyTester(unittest.TestCase):
         self.BEN.history['own'] = [C, C, C, C, C]
         self.BEN.history['opp'] = [C, C, D, C, D]
         test_game(self.BEN, D)
-        self.assertIs(D, self.BEN.choice)
+        self.assertIs(C, self.BEN.choice)
         test_game(self.BEN, C)
         self.assertIs(D, self.BEN.choice)
 
@@ -348,8 +348,8 @@ class StrategyTester(unittest.TestCase):
         self.assertIs(D, self.MADF.choice)
 
         # Test against a specific set of actions
-        self.MADF.history['own'] = [C, C, C, C, C, C, C, C, C, C]
-        self.MADF.history['opp'] = [C, C, C, C, C, C, C, C, C, C]
+        self.MADF.history['own'] = [C]
+        self.MADF.history['opp'] = [C]
         test_game(self.MADF, D)
         self.assertIs(D, self.MADF.choice)
         test_game(self.MADF, C)
@@ -365,13 +365,29 @@ class StrategyTester(unittest.TestCase):
         # Check first choice
         self.assertIs(C, self.DOWN.choice)
 
-        # Test against a specific set of actions
+        # Test against 100% compliance
         self.DOWN.history['own'] = [C, C, C, C, C, C, C, C, C, C]
         self.DOWN.history['opp'] = [C, C, C, C, C, C, C, C, C, C]
-        test_game(self.DOWN, D)
-        self.assertIs(C, self.DOWN.choice)
         test_game(self.DOWN, C)
         self.assertIs(C, self.DOWN.choice)
+
+        # Test against 80% compliance
+        self.DOWN.history['own'] = [C, C, C, C, C, C, C, C, C, C]
+        self.DOWN.history['opp'] = [C, C, C, C, C, C, C, C, D, D]
+        test_game(self.DOWN, C)
+        self.assertIs(C, self.DOWN.choice)
+
+        # Test against 70% compliance
+        self.DOWN.history['own'] = [C, C, C, C, C, C, C, C, C, C]
+        self.DOWN.history['opp'] = [C, C, C, C, C, C, C, D, D, D]
+        test_game(self.DOWN, C)
+        self.assertIs(C, self.DOWN.choice)
+
+        # Test against 60% compliance
+        self.DOWN.history['own'] = [C, C, C, C, C, C, C, C, C, C]
+        self.DOWN.history['opp'] = [C, C, C, C, C, C, D, D, D, D]
+        test_game(self.DOWN, C)
+        self.assertIs(D, self.DOWN.choice)
 
     def test_DEF1(self):
         # Instantiate the test strategy
@@ -388,8 +404,26 @@ class StrategyTester(unittest.TestCase):
         self.DEF1.history['opp'] = [C, C, C, C, C, C, C, C, C, C]
         test_game(self.DEF1, D)
         self.assertIs(C, self.DEF1.choice)
-        test_game(self.DEF1, C)
+        test_game(self.DEF1, D)
         self.assertIs(C, self.DEF1.choice)
+
+    def test_COOP1(self):
+        # Instantiate the test strategy
+        self.COOP1 = CooperateOnce()
+
+        # Check the name
+        self.assertTrue(self.COOP1.name == "CooperateOnce")
+
+        # Check first choice
+        self.assertIs(C, self.COOP1.choice)
+
+        # Test against a specific set of actions
+        self.COOP1.history['own'] = [C, C, C, C, C, C, C, C, C, C]
+        self.COOP1.history['opp'] = [C, C, C, C, C, C, C, C, C, C]
+        test_game(self.COOP1, C)
+        self.assertIs(D, self.COOP1.choice)
+        test_game(self.COOP1, C)
+        self.assertIs(D, self.COOP1.choice)
 
 
 # Run tests:
