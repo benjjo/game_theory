@@ -267,11 +267,27 @@ class StrategyTester(unittest.TestCase):
         # Check first choice
         self.assertIs(C, self.WSLS.choice)
 
-        # Test against a specific set of actions
-        test_game(self.WSLS, C)
-        self.assertIs(C, self.WSLS.choice)
+        # Both Cooperate, then opponent Defects
+        self.WSLS.history['own'] = [C]
+        self.WSLS.history['opp'] = [C]
         test_game(self.WSLS, D)
         self.assertIs(C, self.WSLS.choice)
+        test_game(self.WSLS, D)
+        self.assertIs(D, self.WSLS.choice)
+
+        # Both Defect, then opponent Cooperates
+        self.WSLS.history['own'] = [D]
+        self.WSLS.history['opp'] = [D]
+        test_game(self.WSLS, C)
+        self.assertIs(C, self.WSLS.choice)
+        test_game(self.WSLS, C)
+        self.assertIs(C, self.WSLS.choice)
+
+        # Opponent Defects, then Cooperates
+        self.WSLS.history['own'] = [D, C]
+        self.WSLS.history['opp'] = [D, D]
+        test_game(self.WSLS, C)
+        self.assertIs(D, self.WSLS.choice)
         test_game(self.WSLS, C)
         self.assertIs(D, self.WSLS.choice)
 
@@ -286,10 +302,10 @@ class StrategyTester(unittest.TestCase):
         self.assertIs(C, self.BEN.choice)
 
         # Test against a specific set of actions
-        self.BEN.history['own'] = [C, C, C, C, C, C, C, C, C, C]
-        self.BEN.history['opp'] = [C, C, C, C, C, C, C, C, C, C]
+        self.BEN.history['own'] = [C, C, C, C, C]
+        self.BEN.history['opp'] = [C, C, D, C, D]
         test_game(self.BEN, D)
-        self.assertIs(C, self.BEN.choice)
+        self.assertIs(D, self.BEN.choice)
         test_game(self.BEN, C)
         self.assertIs(D, self.BEN.choice)
 
@@ -304,12 +320,22 @@ class StrategyTester(unittest.TestCase):
         self.assertIs(C, self.MTFT.choice)
 
         # Test against a specific set of actions
-        self.MTFT.history['own'] = [C, C, C, C, C, C, C, C, C, C]
-        self.MTFT.history['opp'] = [C, C, C, C, C, C, C, C, C, C]
+        self.MTFT.history['own'] = [C, C, C, C, C]
+        self.MTFT.history['opp'] = [C, C, C, C, C]
         test_game(self.MTFT, D)
         self.assertIs(C, self.MTFT.choice)
-        test_game(self.MTFT, C)
+
+        # Test against a specific set of actions
+        self.MTFT.history['own'] = [C, C, C, C, C]
+        self.MTFT.history['opp'] = [C, C, C, D, D]
+        test_game(self.MTFT, D)
         self.assertIs(C, self.MTFT.choice)
+
+        # Tipping point for Defection
+        self.MTFT.history['own'] = [C, C, C, C, C]
+        self.MTFT.history['opp'] = [C, C, D, D, D]
+        test_game(self.MTFT, D)
+        self.assertIs(D, self.MTFT.choice)
 
     def test_MADF(self):
         # Instantiate the test strategy

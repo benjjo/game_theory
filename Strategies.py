@@ -536,8 +536,8 @@ class WinStayLooseShift(Strategy):
 
     def strategy(self):
         if self.history['opp']:
-            self.payoff = Tools.get_payoff_type(self.choice, self.history['opp'][-1])
-        self.choice = (C if self.payoff in ['R', 'T', 'P'] else D)
+            self.payoff = Tools.get_payoff_type(self.history['own'][-1], self.history['opp'][-1])
+        self.choice = (C if self.payoff in ['R', 'P'] else D)
 
 
 class Benjo(Strategy):
@@ -549,6 +549,7 @@ class Benjo(Strategy):
 
     def __init__(self):
         super().__init__("Benjo", C)
+        self.payoff = 'R'
 
     @property
     def choice(self):
@@ -567,8 +568,8 @@ class Benjo(Strategy):
             if self.history['opp'][-2:].count(D) == 2:
                 self.choice = D
             else:
-                payoff = Tools.get_payoff_type(self.choice, self.history['opp'][-1])
-                self.choice = (C if payoff in ['R', 'T', 'P'] else 'Defect')
+                self.payoff = Tools.get_payoff_type(self.choice, self.history['opp'][-1])
+                self.choice = (C if self.payoff in ['R', 'P'] else D)
         else:
             self.choice = C
 
