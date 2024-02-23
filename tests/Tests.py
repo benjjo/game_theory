@@ -425,6 +425,51 @@ class StrategyTester(unittest.TestCase):
         test_game(self.COOP1, C)
         self.assertIs(D, self.COOP1.choice)
 
+    def test_TST(self):
+        # Instantiate the test strategy
+        self.TST = Tester()
+
+        # Check the name
+        self.assertTrue(self.TST.name == "Tester")
+
+        # Check first choice
+        self.assertIs(D, self.TST.choice)
+
+        # Test against Defection on the first response from opponent (1st choice being C, response being D)
+        test_game(self.TST, D)
+        # Test choice
+        self.assertIs(D, self.TST.choice)  # C matching first choice of opponent
+        # Test history
+        self.assertEqual([D], self.TST.history['own'])
+        self.assertEqual([D], self.TST.history['opp'])
+
+        self.TST = Tester()
+        # Test that TitForTat continues
+        for _ in range(5):
+            test_game(self.TST, D)
+        for _ in range(5):
+            test_game(self.TST, C)
+
+        # Test history
+        self.assertEqual([D, D, D, D, D, D, C, C, C, C], self.TST.history['own'])
+        self.assertEqual([D, D, D, D, D, C, C, C, C, C], self.TST.history['opp'])
+
+        # Fresh start
+        self.TST = Tester()
+        # Test against Cooperation on the first response from opponent
+        test_game(self.TST, C)
+        self.assertIs(D, self.TST.choice)
+
+        # Test that TitForTat continues
+        for _ in range(4):
+            test_game(self.TST, D)
+        for _ in range(5):
+            test_game(self.TST, C)
+
+        # Test history
+        self.assertEqual([D, C, D, C, D, C, D, C, D, C], self.TST.history['own'])
+        self.assertEqual([C, D, D, D, D, C, C, C, C, C], self.TST.history['opp'])
+
 
 class ToolsTester(unittest.TestCase):
 

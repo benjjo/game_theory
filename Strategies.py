@@ -778,3 +778,33 @@ class CooperateOnce(Strategy):
 
     def strategy(self):
         self.choice = D
+
+
+class Tester(Strategy):
+    """
+    Will probe the opponent on the first move with a Defect. If the opponent responds with a Defect, it will play
+    TitForTat. If the opponent responds with a Cooperation, it will Defect every other move for the rest of the game.
+
+    """
+
+    def __init__(self):
+        super().__init__("Tester", D)
+
+    @property
+    def choice(self):
+        return self._choice
+
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
+
+    def history_data(self, opponent_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opponent_choice)
+
+    def strategy(self):
+        if self.history['opp']:
+            if self.history['opp'][0] == D:
+                self.choice = self.history['opp'][-1]
+            else:
+                self.choice = D if self.history['own'][-1] == C else C
