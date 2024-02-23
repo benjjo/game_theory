@@ -24,21 +24,38 @@ Subclass examples: `TitForTat` is a strategy that cooperates initially and then 
 I simply run the `prisoners_dilema.py` script in a python shell to retrieve the output. Or something like PyCharm/VS-Code/Jupyter-Lab will enable you to see the output printed to the screen. The below shows the code that is tacked onto the end of the script. Update to modify the output.  
 
 ```commandline
-strategies = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
-              AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
-              TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]  # Add more strategies as needed
+from Strategies import *
 
-games = random.randint(200, 1000)tournament = Tournament(strategies, num_games_per_match=200, noise=True)  # noise=False will remove random noise.
+# No random elements # Add more strategies as needed
+strategies_non_random = [TitForTat, AlwaysDefect, GenerousTitForTat, ModalTFT, AlwaysCooperate,
+                         Friedman, Graaskamp, Nydegger, DefectOnce, TitForTwoTats, WinStayLooseShift,
+                         Benjo, Shubik, Downing]
 
-overall_scores = tournament.run_tournament()
+# Introduced random elements
+strategies_random = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
+                     AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+                     TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]
+
+# All the strategies
+strategies_all = [TitForTat, AlwaysDefect, AlwaysCooperate, GenerousTitForTat, Friedman,
+                  Joss, Graaskamp, TidemanChieruzzi, Nydegger, TitForTwoTats, Random, Shubik,
+                  WinStayLooseShift, Benjo, ModalTFT, ModalDefector, Downing]
+
+# games = random.randint(200, 1000)
+games = 2000
+
+# Running games
+tournament = Tournament(strategies_all, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
+overall_scores = tournament.round_robin()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
 print("")
 print('*'*44)
 print(" Overall Scores, sorted by highest ranking:")
 print('*'*44)
+print(f"Number of games: {games}\n")
 for strategy, score in sorted_scores:
-    print(f"{strategy}: {score}")
+    print(f"{strategy:>20}: {score}")
 print('*'*44)
 ```
 
@@ -90,27 +107,26 @@ AlwaysDefect: 10284
 ********************************************
  Overall Scores, sorted by highest ranking:
 ********************************************
-Number of games: 970
+Number of games: 2000
 
-            ModalTFT: 88841
-     AlwaysCooperate: 83158
-             Downing: 82963
-          DefectOnce: 82716
-       TitForTwoTats: 82423
-            Nydegger: 81416
-   GenerousTitForTat: 76096
-               Benjo: 74409
-   WinStayLooseShift: 73454
-           TitForTat: 73088
-              Random: 72668
-            Friedman: 70091
-           Graaskamp: 69659
-                Joss: 65809
-        AlwaysDefect: 65510
-    TidemanChieruzzi: 64452
-              Shubik: 61623
+   GenerousTitForTat: 74207
+           TitForTat: 72877
+       TitForTwoTats: 72112
+               Benjo: 71256
+              Random: 66892
+            ModalTFT: 65699
+     AlwaysCooperate: 64952
+   WinStayLooseShift: 64364
+            Nydegger: 62681
+           Graaskamp: 61749
+                Joss: 60123
+            Friedman: 59906
+    TidemanChieruzzi: 59730
+              Shubik: 59649
+        AlwaysDefect: 59537
+       ModalDefector: 59421
+             Downing: 58230
 ********************************************
-
 ```
 # References
 Malik, A. (2020). Strategies for the Iterated Prisoner’s Dilemma. November 2020. Retrieved from https://arxiv.org/pdf/2111.11561.pdf

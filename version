@@ -1,0 +1,30 @@
+Version 1.0
+Date: 23-02-2024
+Comments:
+    Finally confident that I have a working version that reports accurate data.
+    Tests revealed Beta versions had problems with tournament staging and scoring.
+    Implemented tests pass. GenerousTitForTat seems to win over its counterparts.
+
+    ********************************************
+     Overall Scores, sorted by highest ranking:
+    ********************************************
+    Number of games: 2000
+
+       GenerousTitForTat: 68908
+           TitForTwoTats: 65303
+               TitForTat: 64261
+         AlwaysCooperate: 59320
+                  Random: 57992
+                ModalTFT: 56654
+       WinStayLooseShift: 55460
+               Graaskamp: 54924
+                 Downing: 54461
+                Nydegger: 53101
+                    Joss: 52820
+        TidemanChieruzzi: 52114
+                  Shubik: 51948
+            AlwaysDefect: 51903
+                Friedman: 51862
+                   Benjo: 51829
+           ModalDefector: 51697
+    ********************************************

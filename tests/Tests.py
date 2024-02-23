@@ -426,6 +426,48 @@ class StrategyTester(unittest.TestCase):
         self.assertIs(D, self.COOP1.choice)
 
 
+class ToolsTester(unittest.TestCase):
+
+    def test_calculate_payoff(self):
+        self.assertEqual(Tools.calculate_payoff(C, C), 3)
+        self.assertEqual(Tools.calculate_payoff(C, D), 0)
+        self.assertEqual(Tools.calculate_payoff(D, C), 5)
+        self.assertEqual(Tools.calculate_payoff(D, D), 1)
+
+    def test_calculate_payoff_type(self):
+        self.assertEqual(Tools.get_payoff_type(C, C), 'R')
+        self.assertEqual(Tools.get_payoff_type(C, D), 'S')
+        self.assertEqual(Tools.get_payoff_type(D, C), 'T')
+        self.assertEqual(Tools.get_payoff_type(D, D), 'P')
+
+    def test_random_5050_sample(self):
+        test_list = Tools.random_5050_sample(100, 0.7)
+        # Test that list only contains C and D
+        test_result = (test_list.count(C) + test_list.count(D) == len(test_list))
+        self.assertTrue(test_result)
+        # Test that the list contains both C and D
+        self.assertTrue(C and D in test_list, 'Unified data in test list')
+
+    def test_compare_samples(self):
+        test_case = Tools.compare_samples([C, C, D, D], [D, D, C, C])
+        self.assertFalse(test_case)
+        test_case = Tools.compare_samples([D, D, D, C], [C, C, D, D])
+        self.assertFalse(test_case)
+        test_case = Tools.compare_samples([C, C, C, C], [D, D, D, D])
+        self.assertTrue(test_case)
+
+    def test_score_board(self):
+        tournament = Tournament([AlwaysDefect, AlwaysCooperate], num_games_per_match=1, noise=False)
+        overall_scores = tournament.round_robin()
+        self.assertEqual(overall_scores['AlwaysDefect'], 6)
+        self.assertEqual(overall_scores['AlwaysCooperate'], 3)
+
+    def test_object_spawner(self):
+        test_list = [AlwaysDefect, TitForTat]
+        test_output = Tools.object_spawner(test_list)
+        self.assertEqual(len(test_output), 2)
+
+
 # Run tests:
 if __name__ == '__main__':
     unittest.main()

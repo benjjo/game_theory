@@ -1,4 +1,3 @@
-from GameTools import Tournament
 from Strategies import *
 
 # No random elements # Add more strategies as needed
@@ -11,6 +10,7 @@ strategies_random = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanCh
                      AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
                      TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]
 
+# All the strategies
 strategies_all = [TitForTat, AlwaysDefect, AlwaysCooperate, GenerousTitForTat, Friedman,
                   Joss, Graaskamp, TidemanChieruzzi, Nydegger, TitForTwoTats, Random, Shubik,
                   WinStayLooseShift, Benjo, ModalTFT, ModalDefector, Downing]
@@ -20,7 +20,7 @@ games = 2000
 
 # Running games
 tournament = Tournament(strategies_all, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
-overall_scores = tournament.run_tournament()
+overall_scores = tournament.round_robin()
 
 sorted_scores = sorted(overall_scores.items(), key=lambda x: x[1], reverse=True)
 print("")

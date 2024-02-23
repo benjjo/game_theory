@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import statistics
 
 C = "Cooperate"
 D = "Defect"
@@ -74,14 +75,19 @@ class Tools:
         obj2.history_data(own_choice=obj2_choice, opponent_choice=obj1_choice)
 
     @staticmethod
-    def generate_choice_noise(choice):
+    def generate_choice_noise(choice, chance=100):
         # 1% chance the choice will be flipped. This will only be invoked if noise is set to True.
-        if random.randint(1, 100) == 1:
-            if choice == D:
-                return C
-            else:
-                return D
+        if random.randint(1, chance) == 1:
+            return C if choice == D else D
         return choice
+
+    @staticmethod
+    def object_spawner(strategy_classes):
+        strategy_objects = list()
+        for strategy_class in strategy_classes:
+            strategy = strategy_class()
+            strategy_objects.append(strategy)
+        return strategy_objects
 
 
 class GameRunner:
@@ -93,20 +99,18 @@ class GameRunner:
         A score of 1-1 is awarded to a Defect - Defect outcome.
     :returns: str (name of strategy 1), int (strategy 1 score), str (name of strategy 2), int (strategy 2 score)
     """
-    def __init__(self, player1, player2, num_games, noise):
-        self.player1 = player1
-        self.player2 = player2
+    def __init__(self, num_games, noise):
         self.num_games = num_games
         self.noise = noise
 
-    def run_game(self):
+    def run_game(self, player1, player2):
         player1_score = 0
         player2_score = 0
 
         for _ in range(self.num_games):
             # Strategies are instantiated with a choice already made.
-            p1_choice = self.player1.choice
-            p2_choice = self.player2.choice
+            p1_choice = player1.choice
+            p2_choice = player2.choice
 
             if self.noise:
                 # If noise is set to True, this will introduce a 1% chance of the choice being flipped.
@@ -118,15 +122,15 @@ class GameRunner:
             player2_score += Tools.calculate_payoff(p2_choice, p1_choice)
 
             # Update the historical data after the choices have been scored
-            self.player1.history_data(opponent_choice=p2_choice, own_choice=p1_choice)
-            self.player2.history_data(opponent_choice=p1_choice, own_choice=p2_choice)
+            player1.history_data(opponent_choice=p2_choice, own_choice=p1_choice)
+            player2.history_data(opponent_choice=p1_choice, own_choice=p2_choice)
 
             # Run the strategies to set the next decision
-            self.player1.strategy()
-            self.player2.strategy()
+            player1.strategy()
+            player2.strategy()
 
-        print(f"{self.player1.name:>20} vs {self.player2.name:<20} {player1_score:>20} : {player2_score} ")
-        return self.player1, player1_score, self.player2, player2_score
+        print(f"{player1.name:>20} vs {player2.name:<20} {player1_score:>20} : {player2_score} ")
+        return player1, player1_score, player2, player2_score
 
     @staticmethod
     def generate_choice_noise(choice):
@@ -148,19 +152,60 @@ class Tournament:
 
     def run_tournament(self):
         """
-        A fresh object is instantiated for each round.
+        A fresh object is instantiated for each round. All strategies against all strategies.
+        i.e. [p1, p2] will play games in the following fashion:
+            p1 vs p1
+            p1 vs p2
+            p2 vs p1
+            p2 vs p2
+            This means that a strategy playing itself will play itself 4 times.
         :return: dict
         """
-        noise = self.noise
         for i, strategy1 in enumerate(self.strategy_classes):
             for j, strategy2 in enumerate(self.strategy_classes):
                 # if i != j:  # Avoid playing a strategy against itself
                 player1 = strategy1()
                 player2 = strategy2()
                 # Change the noise assignment to True to introduce noise
-                game_runner = GameRunner(player1, player2, self.num_games_per_match, noise)
-                player1, player1_score, player2, player2_score = game_runner.run_game()
+                game_runner = GameRunner(self.num_games_per_match, self.noise)
+                player1, player1_score, player2, player2_score = game_runner.run_game(player1, player2)
 
-                self.scores[player1.name] += player1_score
-                self.scores[player2.name] += player2_score
+                # Halve the score for a strategy playing itself otherwise it will update the same score key twice.
+                if player1.name == player2.name:
+                    score = statistics.mean([player1_score, player1_score])
+                    self.scores[player1.name] += score
+                else:
+                    # Update the scores for differing opponents
+                    self.scores[player1.name] += player1_score
+                    self.scores[player2.name] += player2_score
+
+        return self.scores
+
+    def round_robin(self):
+        """
+        A Round-Robin tournament between each of the strategies. Each strategy will play itself and another strategy
+        once. i.e. [p1, p2] will play games in the following fashion:
+            p1 vs p1
+            p1 vs p2
+            p2 vs p2
+        :return: dict
+        """
+        strategy_objs = Tools.object_spawner(self.strategy_classes)
+
+        for player1 in strategy_objs:
+            for player2 in strategy_objs:
+                # Change the noise assignment to True to introduce noise
+                game_runner = GameRunner(self.num_games_per_match, self.noise)
+                player1, player1_score, player2, player2_score = game_runner.run_game(player1, player2)
+
+                # Halve the score for a strategy playing itself otherwise it will update the same score key twice.
+                if player1.name == player2.name:
+                    score = statistics.mean([player1_score, player1_score])
+                    self.scores[player1.name] += score
+                else:
+                    # Update the scores for differing opponents
+                    self.scores[player1.name] += player1_score
+                    self.scores[player2.name] += player2_score
+            strategy_objs = strategy_objs[1:]
+
         return self.scores

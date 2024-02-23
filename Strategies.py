@@ -1,5 +1,4 @@
-import random
-from GameTools import Tools
+from GameTools import *
 import statistics
 C = "Cooperate"
 D = "Defect"
