@@ -1,30 +1,41 @@
-Version 1.0
-Date: 23-02-2024
+Version 1.1
+Date: 29-02-2024
 Comments:
-    Finally confident that I have a working version that reports accurate data.
-    Tests revealed Beta versions had problems with tournament staging and scoring.
-    Implemented tests pass. GenerousTitForTat seems to win over its counterparts.
+    Original Axelrod tournament implemented. Although, it is missing the NameWithheld strategy.
 
     ********************************************
      Overall Scores, sorted by highest ranking:
     ********************************************
     Number of games: 2000
 
-       GenerousTitForTat: 68908
-           TitForTwoTats: 65303
-               TitForTat: 64261
-         AlwaysCooperate: 59320
-                  Random: 57992
-                ModalTFT: 56654
-       WinStayLooseShift: 55460
-               Graaskamp: 54924
-                 Downing: 54461
-                Nydegger: 53101
-                    Joss: 52820
-        TidemanChieruzzi: 52114
-                  Shubik: 51948
-            AlwaysDefect: 51903
-                Friedman: 51862
-                   Benjo: 51829
-           ModalDefector: 51697
+       GenerousTitForTat: 97393
+               TitForTat: 95386
+                  Tester: 93991
+                   Benjo: 93743
+           TitForTwoTats: 91456
+        SteinAndRapoport: 91237
+                  Shubik: 91046
+           ModalDefector: 91023
+                 Grudger: 90872
+        TidemanChieruzzi: 90792
+                   Davis: 90767
+            AlwaysDefect: 90415
+                  Random: 90408
+       WinStayLooseShift: 88762
+                 Tullock: 86818
+                Nydegger: 85091
+               Graaskamp: 84922
+                 Grofman: 84373
+                    Joss: 83582
+         AlwaysCooperate: 83449
+                    Feld: 82698
+                 Downing: 82538
+                ModalTFT: 81969
     ********************************************
+
+Version 1.0
+Date: 23-02-2024
+Comments:
+    Finally confident that I have a working version that reports accurate data.
+    Tests revealed Beta versions had problems with tournament staging and scoring.
+    Implemented tests pass. GenerousTitForTat seems to win over its counterparts.

@@ -1,6 +1,7 @@
 import random
-import numpy as np
 import statistics
+import numpy as np
+from scipy.stats import chi2_contingency
 
 C = "Cooperate"
 D = "Defect"
@@ -18,9 +19,9 @@ class Tools:
         """
         score_matrix = {
             ("Cooperate", "Cooperate"): 3,
-            ("Cooperate", "Defect"):    0,
-            ("Defect", "Cooperate"):    5,
-            ("Defect", "Defect"):       1
+            ("Cooperate", "Defect"): 0,
+            ("Defect", "Cooperate"): 5,
+            ("Defect", "Defect"): 1
         }
         # Retrieve the payoff for the given actions
         return score_matrix.get((player_action, opponent_action))
@@ -38,9 +39,9 @@ class Tools:
         """
         payoff_matrix = {
             ("Cooperate", "Cooperate"): 'R',
-            ("Cooperate", "Defect"):    'S',
-            ("Defect", "Cooperate"):    'T',
-            ("Defect", "Defect"):       'P'
+            ("Cooperate", "Defect"): 'S',
+            ("Defect", "Cooperate"): 'T',
+            ("Defect", "Defect"): 'P'
         }
         # Retrieve the payoff for the given actions
         return payoff_matrix.get((player_action, opponent_action))
@@ -89,6 +90,48 @@ class Tools:
             strategy_objects.append(strategy)
         return strategy_objects
 
+    @staticmethod
+    def check_randomness(data: list):
+        if Tools.is_alternating_pattern(data):
+            return False
+        # Count the occurrences of each element
+        counts = {C: data.count(C), D: data.count(D)}
+
+        # Calculate the total count
+        total_count = sum(counts.values())
+
+        # Calculate the proportions
+        proportions = {element: count / total_count for element, count in counts.items()}
+
+        # Define the expected frequencies assuming randomness
+        expected_frequency = total_count / len(counts)
+
+        # Construct the observed and expected frequencies arrays
+        observed = np.array([counts['Cooperate'], counts['Defect']])
+        expected = np.array([expected_frequency, expected_frequency])
+
+        # Perform the Chi-squared test
+        chi2_stat, p_value, _, _ = chi2_contingency([observed, expected])
+
+        # Output the result of the test
+        return False if p_value < 0.05 else True
+
+    @staticmethod
+    def is_alternating_pattern(data):
+        # Check if the list is empty or has only one element
+        if len(data) < 2:
+            return False
+
+        # Iterate through the list starting from the second element
+        for i in range(1, len(data)):
+            # Check if the current element is the same as the previous element
+            if data[i] == data[i - 1]:
+                return False  # If consecutive elements are the same, it's not an alternating pattern
+
+        # If the loop completes without finding consecutive elements that are the same,
+        # it means the list is an alternating pattern
+        return True
+
 
 class GameRunner:
     """Runs two strategies against each other for a set number of games. Presents the scores at the end in text.
@@ -99,6 +142,7 @@ class GameRunner:
         A score of 1-1 is awarded to a Defect - Defect outcome.
     :returns: str (name of strategy 1), int (strategy 1 score), str (name of strategy 2), int (strategy 2 score)
     """
+
     def __init__(self, num_games, noise):
         self.num_games = num_games
         self.noise = noise
@@ -144,6 +188,7 @@ class Tournament:
     """Utilising the GameRunner class, runs a tournament of X amount of games, where the strategies are played
     against each other in a round-robin type of tournament. Scores are then printed to the screen.
     Noise can be introduced by setting the noise parameter to True."""
+
     def __init__(self, strategy_classes, num_games_per_match=200, noise=False):
         self.strategy_classes = strategy_classes
         self.num_games_per_match = num_games_per_match

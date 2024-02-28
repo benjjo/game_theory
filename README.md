@@ -64,68 +64,53 @@ print('*'*44)
 ********************************************
  Overall Scores, sorted by highest ranking:
 ********************************************
-GenerousTitForTat: 4475
-TitForTat: 4067
-Friedman: 4064
-AlwaysDefect: 3837
-AlwaysCooperate: 3832
-********************************************
-```
-```commandline
-********************************************
- Overall Scores, sorted by highest ranking:
-********************************************
-Nydegger: 7852
-AlwaysCooperate: 7201
-GenerousTitForTat: 7157
-TitForTat: 6692
-Graaskamp: 6421
-Friedman: 6074
-AlwaysDefect: 5139
-Joss: 5090
-********************************************
-```
-```commandline
-********************************************
- Overall Scores, sorted by highest ranking:
-********************************************
-Number of games: 303
-
-TitForTwoTats: 15191
-Nydegger: 14571
-GenerousTitForTat: 14360
-AlwaysCooperate: 13977
-TitForTat: 13168
-Random: 13130
-Graaskamp: 12810
-Joss: 11382
-Friedman: 11051
-AlwaysDefect: 10284
-********************************************
-```
-```commandline
-********************************************
- Overall Scores, sorted by highest ranking:
-********************************************
 Number of games: 2000
 
-   GenerousTitForTat: 74207
-           TitForTat: 72877
-       TitForTwoTats: 72112
-               Benjo: 71256
-              Random: 66892
-            ModalTFT: 65699
-     AlwaysCooperate: 64952
-   WinStayLooseShift: 64364
-            Nydegger: 62681
-           Graaskamp: 61749
-                Joss: 60123
-            Friedman: 59906
-    TidemanChieruzzi: 59730
-              Shubik: 59649
-        AlwaysDefect: 59537
-       ModalDefector: 59421
-             Downing: 58230
+   GenerousTitForTat: 97393
+           TitForTat: 95386
+              Tester: 93991
+               Benjo: 93743
+       TitForTwoTats: 91456
+    SteinAndRapoport: 91237
+              Shubik: 91046
+       ModalDefector: 91023
+             Grudger: 90872
+    TidemanChieruzzi: 90792
+               Davis: 90767
+        AlwaysDefect: 90415
+              Random: 90408
+   WinStayLooseShift: 88762
+             Tullock: 86818
+            Nydegger: 85091
+           Graaskamp: 84922
+             Grofman: 84373
+                Joss: 83582
+     AlwaysCooperate: 83449
+                Feld: 82698
+             Downing: 82538
+            ModalTFT: 81969
+********************************************
+```
+```commandline
+********************************************
+ Overall Scores, sorted by highest ranking:
+********************************************
+Number of games: 200
+
+           TitForTat: 6489
+              Shubik: 5963
+    TidemanChieruzzi: 5939
+             Grofman: 5889
+            Nydegger: 5454
+    SteinAndRapoport: 5180
+             Tullock: 4774
+               Davis: 4765
+             Grudger: 4747
+              Random: 4588
+                Feld: 4406
+             Downing: 4317
+           Graaskamp: 3936
+                Joss: 3900
 ********************************************
 ```
 # References

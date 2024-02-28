@@ -136,12 +136,12 @@ class GenerousTitForTat(Strategy):
             self.choice = self.history['opp'][-1]
 
 
-class Friedman(Strategy):
+class Grudger(Strategy):
     """The strategy of do nice unto others until betrayed. This strategy is not a push-over.
      A 'NICE' strategy in that we start peacefully until provoked. Once provoked it is unforgiving"""
 
     def __init__(self):
-        super().__init__("Friedman", C)
+        super().__init__("Grudger", C)
 
     @property
     def choice(self):
@@ -224,8 +224,10 @@ class TidemanChieruzzi(Strategy):
     This strategy begins by playing Tit For Tat and then things get slightly complicated:
     Every run of defections played by the opponent increases the number of defections that this strategy
     retaliates with by 1.
+
     A ‘fresh start’ is a sequence of two co-operations followed by an assumption that the game has just
     started (everything is forgotten).
+
     See https://github.com/Axelrod-Python/Axelrod/issues/1105
     """
 
@@ -254,10 +256,15 @@ class TidemanChieruzzi(Strategy):
 
     def set_fresh_start_condition(self, my_choice, opp_choice):
         """The opponent is given a ‘fresh start’ if:
+
             - it is 10 points behind this strategy
+
             - and it has not just started a run of defections
+
             - and it has been at least 20 rounds since the last ‘fresh start’
+
             - and there are more than 10 rounds remaining in the tournament
+
             - and the total number of defections differs from a 50-50 random sample by at least 3.0 standard deviations.
             """
         self.fresh_start_counter += 1
@@ -380,42 +387,14 @@ class Random(Strategy):
 
 
 class Grofman(Strategy):
-    """The Grofman strategy is a probabilistic strategy designed for the iterated prisoner's dilemma (IPD) game.
-    It was introduced by Bernard Grofman in the early 1980s. The Grofman strategy is based on probabilistic
-    decision-making, aiming to strike a balance between cooperation and defection
+    """
+    Submitted to Axelrod’s first tournament by Bernard Grofman.
 
-    Probabilistic Decision-Making:
-    The core of the Grofman strategy involves probabilistic decision-making. Instead of strictly choosing to cooperate
-    or defect, the strategy assigns probabilities to each action.
+    The description written in [Axelrod1980] is:
 
-    Randomized Choices:
-    In each round of the game, the Grofman strategy randomly chooses between cooperation and defection based on the
-    assigned probabilities.
-
-    Adaptive Probabilities:
-    The strategy adapts its probabilities based on the outcomes of previous rounds. If cooperation leads to favorable
-    outcomes, the probability of cooperating in the next round may increase. Conversely, if defection results in better
-    outcomes, the probability of defecting may increase.
-
-    Learning from Opponent's Behavior:
-    The Grofman strategy may adjust its probabilities based on the opponent's behavior. For example, if the opponent
-    tends to defect frequently, the Grofman strategy may increase the probability of defection in response.
-
-    Exploration and Exploitation:
-    The strategy aims to balance exploration and exploitation. It explores different actions by assigning non-zero
-    probabilities to both cooperation and defection. Over time, it exploits the actions that lead to higher payoffs.
-
-    Stochastic Behavior:
-    The Grofman strategy's stochastic (randomized) behavior adds an element of unpredictability, making it challenging
-    for opponents to exploit a deterministic pattern.
-
-    Probabilistic Tit For Tat (PTFT) Variation:
-    There is a variation of the Grofman strategy known as Probabilistic Tit For Tat (PTFT). PTFT starts by cooperating
-    and then probabilistically imitates the opponent's previous move in each subsequent round.
-
-    Performance in Tournaments:
-    The Grofman strategy is designed to perform well in IPD tournaments by adapting to the opponent's strategy and
-    maintaining a level of unpredictability through its probabilistic decision-making.
+    “If the players did different things on the previous move, this rule cooperates with probability 2/7.
+    Otherwise, this rule always cooperates.”
+    This strategy came 4th in Axelrod’s original tournament.
     """
 
     def __init__(self):
@@ -434,7 +413,13 @@ class Grofman(Strategy):
         self.history['opp'].append(opponent_choice)
 
     def strategy(self):
-        pass
+        if len(self.history['opp']) > 1:
+            if self.history['opp'][-1] != self.history['opp'][-2]:
+                self.choice = random.choices([C, D], weights=[0.71, 0.29])[0]
+            else:
+                self.choice = C
+        else:
+            self.choice = C
 
 
 class Shubik(Strategy):
@@ -477,30 +462,6 @@ class Shubik(Strategy):
 
         if self.retaliation_counter > 0:
             self.retaliation_counter -= 1
-
-
-class SteinRapoport(Strategy):
-    """
-
-    """
-
-    def __init__(self):
-        super().__init__("SteinRapoport", C)
-
-    @property
-    def choice(self):
-        return self._choice
-
-    @choice.setter
-    def choice(self, new_choice):
-        self._choice = new_choice
-
-    def history_data(self, opponent_choice, own_choice):
-        self.history['own'].append(own_choice)
-        self.history['opp'].append(opponent_choice)
-
-    def strategy(self):
-        pass
 
 
 class WinStayLooseShift(Strategy):
@@ -664,13 +625,26 @@ class Downing(Strategy):
                 self.choice = D
 
 
+# noinspection PyPep8Naming
 class Feld(Strategy):
     """
+    Submitted to Axelrod’s first tournament by Scott Feld.
 
+    The description written in [Axelrod1980] is:
+
+    “This rule starts with tit-for-tat and gradually lowers its probability of cooperation following the other’s
+    cooperation to .5 by the two hundredth move. It always defects after a defection by the other.”
+
+    This strategy plays Tit For Tat, always defecting if the opponent defects but cooperating when the opponent
+    cooperates with a gradually decreasing probability until it is only .5. Note that the description does not
+    clearly indicate how the cooperation probability should drop. This implements a linear decreasing function.
+
+    This strategy came 11th in Axelrod’s original tournament.
     """
 
     def __init__(self):
         super().__init__("Feld", C)
+        self.probability_of_Cooperation = 1
 
     @property
     def choice(self):
@@ -685,16 +659,40 @@ class Feld(Strategy):
         self.history['opp'].append(opponent_choice)
 
     def strategy(self):
-        pass
+        if self.history['opp']:
+            if self.history['opp'][-1] == D:
+                self.choice = D
+            else:
+                weight_C = self.probability_of_Cooperation
+                weight_D = 1 - weight_C
+                self.choice = random.choices([C, D], weights=[weight_C, weight_D])[0]
+        if self.probability_of_Cooperation >= 0.5:
+            self.probability_of_Cooperation -= 0.0025
 
 
+# noinspection PyPep8Naming
 class Tullock(Strategy):
     """
+    Submitted to Axelrod’s first tournament by Gordon Tullock.
 
+    The description written in [Axelrod1980] is:
+
+    “This rule cooperates on the first eleven moves. It then cooperates 10% less than the other player has
+    cooperated on the preceding ten moves. This rule is based on an idea developed in Overcast and Tullock (1971).
+    Professor Tullock was invited to specify how the idea could be implemented, and he did so out of scientific
+    interest rather than an expectation that it would be a likely winner.”
+
+    This is interpreted as:
+
+    Cooperates for the first 11 rounds then randomly cooperates 10% less often than the opponent has in the
+    previous 10 rounds.
+
+    This strategy came 13th in Axelrod’s original tournament.
     """
 
     def __init__(self):
         super().__init__("Tullock", C)
+        self.probability_of_Cooperation = 0.5
 
     @property
     def choice(self):
@@ -709,12 +707,31 @@ class Tullock(Strategy):
         self.history['opp'].append(opponent_choice)
 
     def strategy(self):
-        pass
+        if len(self.history['opp']) % 10 == 0 and self.history['opp']:
+            count_opp_C = self.history['opp'][-10:].count(C)
+            self.probability_of_Cooperation = count_opp_C - 1
+            if self.probability_of_Cooperation > 0:
+                self.probability_of_Cooperation /= 10
+            else:
+                self.probability_of_Cooperation = 0
+            weight_C = self.probability_of_Cooperation
+            weight_D = 1 - weight_C
+            self.choice = random.choices([C, D], weights=[weight_C, weight_D])[0]
+        else:
+            self.choice = C
 
 
 class NameWithheld(Strategy):
     """
+    The description written in [Axelrod1980] is:
+    “This rule has a probability of cooperating, P, which is initially 30% and > is updated every 10 moves.
+    P is adjusted if the other player seems random, very cooperative, or very uncooperative. P is also adjusted
+    after move 130 if the rule has a lower score than the other player. Unfortunately, the complex process of
+    adjustment frequently left the probability of cooperation in the 30% to 70% range, and therefore the rule
+    appeared random to many other players.”
 
+    Given the lack of detail this strategy is implemented based on the final sentence of the description which is
+    to have a cooperation probability that is uniformly random in the 30 to 70% range.
     """
 
     def __init__(self):
@@ -808,3 +825,86 @@ class Tester(Strategy):
                 self.choice = self.history['opp'][-1]
             else:
                 self.choice = D if self.history['own'][-1] == C else C
+
+
+class SteinAndRapoport(Strategy):
+    """
+    Submitted to Axelrod’s first tournament by William Stein and Amnon Rapoport.
+
+    The description written in [Axelrod1980] is:
+
+    “This rule plays tit-for-tat except that it cooperates on the first four moves, it defects on the last two
+    moves, and every fifteen moves it checks to see if the opponent seems to be playing randomly. This check uses a
+    chi-squared test of the other’s transition probabilities and also checks for alternating moves of CD and DC.
+
+    This is implemented as follows:
+
+    It cooperates for the first 4 moves.
+    It defects on the last 2 moves.
+    Every 15 moves it makes use of a chi-squared test to check if the opponent is playing randomly. If so it defects.
+    This strategy came 6th in Axelrod’s original tournament.
+
+    """
+
+    def __init__(self):
+        super().__init__("SteinAndRapoport", C)
+
+    @property
+    def choice(self):
+        return self._choice
+
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
+
+    def history_data(self, opponent_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opponent_choice)
+
+    def strategy(self):
+        if len(self.history['own']) > 4:
+            if len(self.history['own']) < 198:
+                if len(self.history['own']) % 15 == 0:
+                    if Tools.is_alternating_pattern(self.history['opp']) \
+                            or Tools.check_randomness(self.history['opp']):
+                        self.choice = D
+                    elif Tools.check_randomness(self.history['opp']):
+                        self.choice = D
+            else:
+                self.choice = D
+        else:
+            self.choice = C
+
+
+class Davis(Strategy):
+    """
+    Submitted to Axelrod’s first tournament by Morton Davis.
+
+    The description written in [Axelrod1980] is:
+
+    “A player starts by cooperating for 10 rounds then plays Grudger, defecting if at any point the opponent
+    has defected.”
+
+    This strategy came 8th in Axelrod’s original tournament.
+    """
+
+    def __init__(self):
+        super().__init__("Davis", C)
+
+    @property
+    def choice(self):
+        return self._choice
+
+    @choice.setter
+    def choice(self, new_choice):
+        self._choice = new_choice
+
+    def history_data(self, opponent_choice, own_choice):
+        self.history['own'].append(own_choice)
+        self.history['opp'].append(opponent_choice)
+
+    def strategy(self):
+        if len(self.history['opp']) >= 10:
+            self.choice = D if D in self.history['opp'] else C
+        else:
+            self.choice = C

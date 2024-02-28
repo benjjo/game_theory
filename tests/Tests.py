@@ -1,5 +1,6 @@
 from Strategies import *
 import unittest
+from itertools import cycle
 
 C = "Cooperate"
 D = "Defect"
@@ -83,29 +84,29 @@ class StrategyTester(unittest.TestCase):
         test_game(self.GTFT, D)
         self.assertIs(C, self.GTFT.choice)
 
-    def test_FMAN(self):
+    def test_GRUD(self):
         # Instantiate the test strategy
-        self.FMAN = Friedman()
+        self.GRUD = Grudger()
 
         # Check the name
-        self.assertTrue(self.FMAN.name == "Friedman")
+        self.assertTrue(self.GRUD.name == "Grudger")
 
         # Check first choice
-        self.assertIs(C, self.FMAN.choice)
+        self.assertIs(C, self.GRUD.choice)
 
         # Test against a Defective move
-        test_game(self.FMAN, D)
-        self.assertIs(C, self.FMAN.choice)
+        test_game(self.GRUD, D)
+        self.assertIs(C, self.GRUD.choice)
 
         # Defect is now in the history data
-        test_game(self.FMAN, C)
-        self.assertIs(D, self.FMAN.choice)
+        test_game(self.GRUD, C)
+        self.assertIs(D, self.GRUD.choice)
 
         # Test against a specific set of actions
-        self.FMAN.history['own'] = [C, C, C, C, C, C, C, C, C, C]
-        self.FMAN.history['opp'] = [C, C, C, C, C, C, C, C, C, D]
-        test_game(self.FMAN, C)
-        self.assertIs(D, self.FMAN.choice)
+        self.GRUD.history['own'] = [C, C, C, C, C, C, C, C, C, C]
+        self.GRUD.history['opp'] = [C, C, C, C, C, C, C, C, C, D]
+        test_game(self.GRUD, C)
+        self.assertIs(D, self.GRUD.choice)
 
     def test_JOSS(self):
         # Instantiate the test strategy
@@ -214,6 +215,17 @@ class StrategyTester(unittest.TestCase):
 
         # Check first choice
         self.assertIs(C, self.GROF.choice)
+        for _ in range(10):
+            test_game(self.GROF, C)
+        self.assertEqual(self.GROF.history['own'], [C, C, C, C, C, C, C, C, C, C], 'Mismatched historical data')
+
+        self.GROF = Grofman()
+        cycle_choice = cycle([C, D])
+        for _ in range(10000):
+            iter_choice = next(cycle_choice)
+            test_game(self.GROF, iter_choice)
+        counts = {element: self.GROF.history['own'].count(element) for element in set(self.GROF.history['own'])}
+        self.assertTrue(counts[D] / counts[C] < 0.42, 'Unweighted distribution detected.')
 
     def test_SHU(self):
         # Instantiate the test strategy
@@ -389,6 +401,57 @@ class StrategyTester(unittest.TestCase):
         test_game(self.DOWN, C)
         self.assertIs(D, self.DOWN.choice)
 
+    def test_FELD(self):
+        # Instantiate the test strategy
+        self.FEL = Feld()
+
+        # Check the name
+        self.assertTrue(self.FEL.name == "Feld")
+        # The following is used to calculate the prob. of cooperation. Used to test later.
+        self.assertTrue(self.FEL.probability_of_Cooperation)
+
+        # Check first choice
+        self.assertIs(C, self.FEL.choice)
+
+        # Test for the probability of Tit-for-tat behaviour as games increase
+        cycle_choice = cycle([C, D])
+        for _ in range(100):
+            iter_choice = next(cycle_choice)
+            test_game(self.FEL, iter_choice)
+        # At 100 games, the probability of TFT behaviour should be at 0.75
+        self.assertEqual(round(self.FEL.probability_of_Cooperation, 2), 0.75)
+
+        # Test for the probability of Tit-for-tat behaviour as games increases to 0.5.
+        for _ in range(100):
+            iter_choice = next(cycle_choice)
+            test_game(self.FEL, iter_choice)
+        # At 200 games, the probability of TFT behaviour should be at 0.5
+        self.assertEqual(round(self.FEL.probability_of_Cooperation, 1), 0.5)
+
+    def test_TUL(self):
+        # Instantiate the test strategy
+        self.TUL = Tullock()
+
+        # Check the name
+        self.assertTrue(self.TUL.name == "Tullock")
+
+        # Check first choice
+        self.assertIs(C, self.TUL.choice)
+
+        # Test for the probability of Tit-for-tat behaviour as games increase
+        cycle_choice = cycle([C, D])
+        for _ in range(10):
+            iter_choice = next(cycle_choice)
+            test_game(self.TUL, iter_choice)
+        self.assertEqual(self.TUL.history['own'], [C, C, C, C, C, C, C, C, C, C])
+        test_game(self.TUL, D)
+        self.assertTrue(self.TUL.probability_of_Cooperation == 0.4)
+        for _ in range(6):
+            test_game(self.TUL, D)
+        for _ in range(4):
+            test_game(self.TUL, C)
+        self.assertTrue(self.TUL.probability_of_Cooperation == 0.2)
+
     def test_DEF1(self):
         # Instantiate the test strategy
         self.DEF1 = DefectOnce()
@@ -470,6 +533,75 @@ class StrategyTester(unittest.TestCase):
         self.assertEqual([D, C, D, C, D, C, D, C, D, C], self.TST.history['own'])
         self.assertEqual([C, D, D, D, D, C, C, C, C, C], self.TST.history['opp'])
 
+    def test_SAP(self):
+        # Instantiate the test strategy
+        self.SAP = SteinAndRapoport()
+
+        # Check the name
+        self.assertTrue(self.SAP.name == "SteinAndRapoport")
+
+        # Check first choice
+        self.assertIs(C, self.SAP.choice)
+
+        # Check first 4 are C
+        for _ in range(4):
+            test_game(self.SAP, D)
+        self.assertEqual(self.SAP.history['own'], [C, C, C, C])
+
+        # Check 15th move chooses C following a slew of C
+        self.SAP = SteinAndRapoport()
+        self.assertIs(C, self.SAP.choice)
+        for _ in range(16):
+            test_game(self.SAP, C)
+        self.assertIs(self.SAP.choice, C)
+
+        # Check 15th Move Defects after a random sample
+        self.SAP = SteinAndRapoport()
+        for _ in range(16):
+            test_game(self.SAP, random.choice([C, D]))
+        self.assertIs(self.SAP.choice, D)
+
+        # Check 15th Move Defects after a random sample
+        self.SAP = SteinAndRapoport()
+        for _ in range(16):
+            test_game(self.SAP, random.choice([C, D]))
+        self.assertIs(self.SAP.choice, D)
+
+        # Check 199th and 200th Moves Defect
+        self.SAP = SteinAndRapoport()
+        for _ in range(200):
+            test_game(self.SAP, C)
+        self.assertEqual(self.SAP.history['own'][-2:], [D, D])
+
+        # Check 15th Move Defects after an alternating pattern is detected
+        self.SAP = SteinAndRapoport()
+        cycle_choice = cycle([C, D])
+        for _ in range(16):
+            iter_choice = next(cycle_choice)
+            test_game(self.SAP, iter_choice)
+        self.assertIs(self.SAP.history['own'][-1], D)
+
+    def test_DAV(self):
+        # Instantiate the test strategy
+        self.DAV = Davis()
+
+        # Check the name
+        self.assertTrue(self.DAV.name == "Davis")
+
+        # Check first choice
+        self.assertIs(C, self.DAV.choice)
+
+        # Test against a specific set of actions
+        for _ in range(10):
+            test_game(self.DAV, D)
+        self.assertIs(self.DAV.choice, C)
+        test_game(self.DAV, C)
+        self.assertIs(D, self.DAV.choice)
+        for _ in range(100):
+            test_game(self.DAV, C)
+        self.assertIs(self.DAV.choice, D)
+
+
 
 class ToolsTester(unittest.TestCase):
 
@@ -511,6 +643,34 @@ class ToolsTester(unittest.TestCase):
         test_list = [AlwaysDefect, TitForTat]
         test_output = Tools.object_spawner(test_list)
         self.assertEqual(len(test_output), 2)
+
+    def test_check_randomness(self):
+        test_list = [C]*1000
+        test_output = Tools.check_randomness(test_list)
+        self.assertFalse(test_output)
+        test_list = list()
+        for _ in range(100):
+            test_list.append(random.choice([C, D]))
+        test_output = Tools.check_randomness(test_list)
+        self.assertTrue(test_output)
+        test_list = list()
+        cycle_list = cycle([C, D])
+        for _ in range(1000):
+            test_list.append(next(cycle_list))
+        test_output = Tools.check_randomness(test_list)
+        self.assertFalse(test_output)
+
+    def test_is_alternating_pattern(self):
+        test_list = list()
+        cycle_list = cycle([C, D])
+        for _ in range(1000):
+            test_list.append(next(cycle_list))
+        test_result = Tools.is_alternating_pattern(test_list)
+        self.assertTrue(test_result)
+        test_list.append(C)
+        test_list.append(C)
+        test_result = Tools.is_alternating_pattern(test_list)
+        self.assertFalse(test_result)
 
 
 # Run tests:

@@ -2,23 +2,30 @@ from Strategies import *
 
 # No random elements # Add more strategies as needed
 strategies_non_random = [TitForTat, AlwaysDefect, GenerousTitForTat, ModalTFT, AlwaysCooperate,
-                         Friedman, Graaskamp, Nydegger, DefectOnce, TitForTwoTats, WinStayLooseShift,
+                         Grudger, Graaskamp, Nydegger, DefectOnce, TitForTwoTats, WinStayLooseShift,
                          Benjo, Shubik, Downing]
 
 # Introduced random elements
 strategies_random = [TitForTat, AlwaysDefect, GenerousTitForTat, Joss, TidemanChieruzzi, Random,
-                     AlwaysCooperate, Friedman, Graaskamp, Nydegger, DefectOnce, Downing,
+                     AlwaysCooperate, Grudger, Graaskamp, Nydegger, DefectOnce, Downing,
                      TitForTwoTats, WinStayLooseShift, Benjo, Shubik, ModalTFT]
 
 # All the strategies
-strategies_all = [TitForTat, AlwaysDefect, AlwaysCooperate, GenerousTitForTat, Friedman,
+strategies_all = [TitForTat, AlwaysDefect, AlwaysCooperate, GenerousTitForTat, Grudger,
                   Joss, Graaskamp, TidemanChieruzzi, Nydegger, TitForTwoTats, Random, Shubik,
-                  WinStayLooseShift, Benjo, ModalTFT, ModalDefector, Downing]
+                  WinStayLooseShift, Benjo, ModalTFT, ModalDefector, Downing, Grofman, Feld, Tullock,
+                  Tester, SteinAndRapoport, Davis]  # NameWithheld tba
+
+# The original Axelrod tournament
+axelrod_orig = [TitForTat, TidemanChieruzzi, Nydegger, Grofman, Shubik, SteinAndRapoport, Grudger,
+                Davis, Graaskamp,  Downing, Feld, Joss, Tullock, Random]  # NameWithheld tba
+# NameWithheld not yet implemented
 
 # games = random.randint(200, 1000)
 games = 2000
 
-# Running games
+# Running games:
+# tournament = Tournament(axelrod_orig, num_games_per_match=200, noise=False)
 tournament = Tournament(strategies_all, num_games_per_match=games, noise=True)  # Mess with the parameters if you want.
 overall_scores = tournament.round_robin()
 
